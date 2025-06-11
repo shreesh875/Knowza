@@ -26,7 +26,7 @@ interface OpenRouterResponse {
 class DeepSeekService {
   private apiKey: string;
   private baseUrl = 'https://openrouter.ai/api/v1';
-  private model = 'deepseek/deepseek-chat-v3-0324:free'; // Updated to specific v3-0324 model
+  private model = 'deepseek/deepseek-chat-v3-0324:free'; // Corrected model identifier
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -34,7 +34,7 @@ class DeepSeekService {
 
   async sendMessage(messages: DeepSeekMessage[]): Promise<string> {
     try {
-      console.log('Sending message to DeepSeek V3-0324 via OpenRouter:', messages);
+      console.log('Sending message to DeepSeek V3 via OpenRouter:', messages);
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -42,7 +42,7 @@ class DeepSeekService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'BrainFeed - DeepSeek V3-0324',
+          'X-Title': 'AI Video Chat - DeepSeek V3',
         },
         body: JSON.stringify({
           model: this.model,
@@ -76,7 +76,7 @@ class DeepSeekService {
 
   async streamMessage(messages: DeepSeekMessage[], onChunk: (chunk: string) => void): Promise<void> {
     try {
-      console.log('Streaming message to DeepSeek V3-0324 via OpenRouter:', messages);
+      console.log('Streaming message to DeepSeek V3 via OpenRouter:', messages);
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -84,7 +84,7 @@ class DeepSeekService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'BrainFeed - DeepSeek V3-0324',
+          'X-Title': 'AI Video Chat - DeepSeek V3',
         },
         body: JSON.stringify({
           model: this.model,
