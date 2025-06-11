@@ -1,16 +1,17 @@
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
 const OPENAI_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-if (!OPENAI_API_KEY) {
-  throw new Error('Missing VITE_OPENAI_API_KEY environment variable')
-}
-
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
 }
 
 export const sendChatMessage = async (messages: ChatMessage[], feedContext?: string[]): Promise<string> => {
+  // Check if API key is available
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.')
+  }
+
   try {
     // Create context-aware system prompt
     const contextPrompt = feedContext && feedContext.length > 0 
