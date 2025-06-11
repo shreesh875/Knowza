@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
-import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle } from 'lucide-react'
+import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle, Settings } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -563,16 +563,93 @@ const TextChat: React.FC = () => {
   )
 }
 
+const ApiKeySetup: React.FC<{ onApiKeySet: (key: string) => void }> = ({ onApiKeySet }) => {
+  const [apiKey, setApiKey] = useState('')
+  const [isValidating, setIsValidating] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!apiKey.trim()) return
+
+    setIsValidating(true)
+    // Simple validation - just check if it looks like an API key
+    if (apiKey.trim().length > 10) {
+      onApiKeySet(apiKey.trim())
+    }
+    setIsValidating(false)
+  }
+
+  return (
+    <div className="text-center p-12">
+      <div className="mb-8">
+        <div className="w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
+          <Settings className="w-16 h-16 text-primary-600 dark:text-primary-400" />
+        </div>
+        <h3 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
+          Setup Required
+        </h3>
+        <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-lg mx-auto mb-6">
+          To enable video conversations with BrainMate, please enter your Tavus API key. You can get one from the Tavus platform.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
+        <Input
+          type="password"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="Enter your Tavus API key"
+          className="text-center"
+        />
+        <Button 
+          type="submit"
+          disabled={!apiKey.trim() || isValidating}
+          size="lg"
+          className="w-full"
+        >
+          {isValidating ? (
+            <>
+              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+              Validating...
+            </>
+          ) : (
+            'Continue'
+          )}
+        </Button>
+      </form>
+
+      <div className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mb-2">Don't have a Tavus API key?</p>
+        <a 
+          href="https://platform.tavus.io/api-keys" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary-600 hover:text-primary-500 dark:text-primary-400 underline"
+        >
+          Get one from Tavus Platform →
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export const BrainMate: React.FC = () => {
   const [conversation, setConversation] = useState<IConversation | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chatMode, setChatMode] = useState<'video' | 'text'>('video')
+  const [chatMode, setChatMode] = useState<'video' | 'text'>('text')
   const [permissionsGranted, setPermissionsGranted] = useState(false)
   const [permissionError, setPermissionError] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState<string | null>(null)
   const DailyCall = useDaily()
 
-  const apiKey = import.meta.env.VITE_TAVUS_API_KEY
+  // Check for API key in environment variables on mount
+  useEffect(() => {
+    const envApiKey = import.meta.env.VITE_TAVUS_API_KEY
+    if (envApiKey) {
+      setApiKey(envApiKey)
+    }
+  }, [])
 
   const handlePermissionsGranted = () => {
     setPermissionsGranted(true)
@@ -584,9 +661,14 @@ export const BrainMate: React.FC = () => {
     setPermissionsGranted(false)
   }
 
+  const handleApiKeySet = (key: string) => {
+    setApiKey(key)
+    setError(null)
+  }
+
   const startVideoCall = async () => {
     if (!apiKey) {
-      setError('Tavus API key not found in environment variables')
+      setError('Tavus API key is required for video calls')
       return
     }
 
@@ -615,7 +697,7 @@ export const BrainMate: React.FC = () => {
 
   const endVideoCall = () => {
     DailyCall?.leave()
-    if (conversation) {
+    if (conversation && apiKey) {
       endConversation(conversation.conversation_id, apiKey)
     }
     setConversation(null)
@@ -623,6 +705,10 @@ export const BrainMate: React.FC = () => {
 
   const switchToVideoMode = () => {
     setChatMode('video')
+    if (!apiKey) {
+      // API key setup will be shown
+      return
+    }
     if (permissionsGranted && !conversation) {
       startVideoCall()
     }
@@ -672,7 +758,9 @@ export const BrainMate: React.FC = () => {
         <CardContent className="p-0">
           {chatMode === 'video' ? (
             <div className="p-6">
-              {!permissionsGranted ? (
+              {!apiKey ? (
+                <ApiKeySetup onApiKeySet={handleApiKeySet} />
+              ) : !permissionsGranted ? (
                 <MediaPermissions 
                   onPermissionsGranted={handlePermissionsGranted}
                   onPermissionsDenied={handlePermissionsDenied}
