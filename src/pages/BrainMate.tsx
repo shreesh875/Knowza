@@ -9,9 +9,6 @@ import { endConversation } from '../api/endConversation'
 import { useDeepSeekChat } from '../hooks/useDeepSeekChat'
 import type { IConversation, ConversationMessage } from '../types/tavus'
 
-// OpenRouter API Key for DeepSeek V3
-const OPENROUTER_API_KEY = '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'
-
 // WebGL Shader Programs for Chroma Key Effect
 const vertexShaderSource = `
   attribute vec2 a_position;
@@ -369,7 +366,11 @@ const recentFeedTopics = [
   'Data Science Fundamentals'
 ]
 
-const TextChat: React.FC = () => {
+interface TextChatProps {
+  openRouterApiKey: string | null
+}
+
+const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
@@ -383,7 +384,7 @@ const TextChat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Initialize DeepSeek chat hook
-  const { sendMessage: sendDeepSeekMessage, isLoading } = useDeepSeekChat(OPENROUTER_API_KEY)
+  const { sendMessage: sendDeepSeekMessage, isLoading } = useDeepSeekChat(openRouterApiKey)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -394,7 +395,7 @@ const TextChat: React.FC = () => {
   }, [messages, streamingResponse])
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return
+    if (!inputMessage.trim() || isLoading || !openRouterApiKey) return
 
     const userMessage: ConversationMessage = {
       id: Date.now().toString(),
@@ -436,6 +437,22 @@ const TextChat: React.FC = () => {
         break
     }
     setInputMessage(message)
+  }
+
+  if (!openRouterApiKey) {
+    return (
+      <div className="flex items-center justify-center h-[700px]">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+            OpenRouter API Key Required
+          </h3>
+          <p className="text-neutral-600 dark:text-neutral-400 max-w-md">
+            To use the text chat feature, please add your OpenRouter API key to the environment variables as VITE_OPENROUTER_API_KEY.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -648,13 +665,21 @@ export const BrainMate: React.FC = () => {
   const [permissionsGranted, setPermissionsGranted] = useState(false)
   const [permissionError, setPermissionError] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState<string | null>(null)
+  const [openRouterApiKey, setOpenRouterApiKey] = useState<string | null>(null)
   const DailyCall = useDaily()
 
-  // Check for API key in environment variables on mount
+  // Check for API keys in environment variables on mount
   useEffect(() => {
     const envApiKey = import.meta.env.VITE_TAVUS_API_KEY || '2b65ef86349841bbbee6451902796a78'
     if (envApiKey) {
       setApiKey(envApiKey)
+    }
+
+    const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+    if (envOpenRouterApiKey) {
+      setOpenRouterApiKey(envOpenRouterApiKey)
+    } else {
+      setError('OpenRouter API key not found. Please add VITE_OPENROUTER_API_KEY to your .env file.')
     }
   }, [])
 
@@ -803,7 +828,7 @@ export const BrainMate: React.FC = () => {
             </div>
           ) : (
             <div className="p-6">
-              <TextChat />
+              <TextChat openRouterApiKey={openRouterApiKey} />
             </div>
           )}
 
