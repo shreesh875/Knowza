@@ -681,8 +681,9 @@ export const BrainMate: React.FC = () => {
       setApiKey(envApiKey)
     }
 
-    const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY
-    console.log('OpenRouter API Key from env:', envOpenRouterApiKey ? 'Present' : 'Missing')
+    // Use the provided default API key if no environment variable is set
+    const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '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'
+    console.log('OpenRouter API Key:', envOpenRouterApiKey ? 'Present' : 'Missing')
     if (envOpenRouterApiKey) {
       setOpenRouterApiKey(envOpenRouterApiKey)
     } else {
