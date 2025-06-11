@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
-import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle } from 'lucide-react'
+import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { createConversation } from '../api/createConversation'
 import { endConversation } from '../api/endConversation'
+import { sendChatMessage, type ChatMessage } from '../services/openai'
 import type { IConversation } from '../types'
 
 // WebGL Shader Programs for Chroma Key Effect
@@ -81,7 +82,7 @@ const initWebGL = (gl: WebGLRenderingContext) => {
   }
 }
 
-const Video: React.FC<{ id: string }> = ({ id }) => {
+const VideoComponent: React.FC<{ id: string }> = ({ id }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isVideoReady, setIsVideoReady] = useState(false)
@@ -166,7 +167,7 @@ const Video: React.FC<{ id: string }> = ({ id }) => {
   }, [isVideoReady, webGLContext])
 
   return (
-    <div className="relative w-full h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
+    <div className="relative w-full h-[500px] bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
       <DailyVideo
         sessionId={id}
         type="video"
@@ -192,15 +193,12 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
   const requestPermissions = async () => {
     setRequesting(true)
     try {
-      // Request both audio and video permissions
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true
       })
       
-      // Stop the stream immediately as we just needed to check permissions
       stream.getTracks().forEach(track => track.stop())
-      
       onPermissionsGranted()
     } catch (error: any) {
       let errorMessage = 'Failed to access camera and microphone'
@@ -220,37 +218,40 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
   }
 
   return (
-    <div className="text-center p-8">
-      <div className="mb-6">
-        <Camera className="w-16 h-16 text-primary-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
-          Camera and Microphone Access Required
+    <div className="text-center p-12">
+      <div className="mb-8">
+        <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Camera className="w-12 h-12 text-primary-600 dark:text-primary-400" />
+        </div>
+        <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
+          Ready to Meet BrainMate?
         </h3>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          BrainMate needs access to your camera and microphone to provide the best video chat experience.
+        <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-md mx-auto">
+          BrainMate needs access to your camera and microphone to provide the best video learning experience.
         </p>
       </div>
       
       <Button 
         onClick={requestPermissions} 
         disabled={requesting}
-        className="mb-4"
+        size="lg"
+        className="mb-6"
       >
         {requesting ? (
           <>
-            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
             Requesting Access...
           </>
         ) : (
           <>
-            <Camera className="w-4 h-4 mr-2" />
+            <Camera className="w-5 h-5 mr-3" />
             Allow Camera & Microphone
           </>
         )}
       </Button>
       
-      <div className="text-xs text-neutral-500 dark:text-neutral-400">
-        Your privacy is important. We only use your camera and microphone for video calls.
+      <div className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
+        Your privacy is important. We only use your camera and microphone for video calls and never store or share your data.
       </div>
     </div>
   )
@@ -275,14 +276,18 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {remoteParticipantIds.length > 0 ? (
-        <Video id={remoteParticipantIds[0]} />
+        <VideoComponent id={remoteParticipantIds[0]} />
       ) : (
-        <div className="w-full h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
+        <div className="w-full h-[500px] bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-2"></div>
-            <p className="text-neutral-600 dark:text-neutral-400">Connecting to BrainMate...</p>
+            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Bot className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-neutral-600 dark:text-neutral-400 text-lg">Connecting to BrainMate...</p>
+            <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">This may take a few moments</p>
           </div>
         </div>
       )}
@@ -290,7 +295,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
       {/* Local video preview */}
       {localParticipantId && (
         <div className="relative">
-          <div className="absolute top-4 right-4 w-32 h-24 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10">
+          <div className="absolute top-4 right-4 w-40 h-32 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10">
             <DailyVideo
               sessionId={localParticipantId}
               type="video"
@@ -298,7 +303,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
             />
             {!isCameraEnabled && (
               <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
-                <CameraOff className="w-6 h-6 text-neutral-400" />
+                <CameraOff className="w-8 h-8 text-neutral-400" />
               </div>
             )}
           </div>
@@ -308,25 +313,156 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
       <div className="flex items-center justify-center gap-4">
         <Button
           variant={isMicEnabled ? 'primary' : 'secondary'}
-          size="sm"
+          size="lg"
           onClick={toggleMicrophone}
+          className="w-14 h-14 rounded-full"
         >
-          {isMicEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+          {isMicEnabled ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
         </Button>
         
         <Button
           variant={isCameraEnabled ? 'primary' : 'secondary'}
-          size="sm"
+          size="lg"
           onClick={toggleCamera}
+          className="w-14 h-14 rounded-full"
         >
-          {isCameraEnabled ? <Camera className="w-4 h-4" /> : <CameraOff className="w-4 h-4" />}
+          {isCameraEnabled ? <Camera className="w-6 h-6" /> : <CameraOff className="w-6 h-6" />}
         </Button>
         
-        <Button variant="outline" size="sm" onClick={onLeave}>
-          <PhoneOff className="w-4 h-4" />
+        <Button 
+          variant="outline" 
+          size="lg" 
+          onClick={onLeave}
+          className="w-14 h-14 rounded-full border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+        >
+          <PhoneOff className="w-6 h-6" />
         </Button>
       </div>
       <DailyAudio />
+    </div>
+  )
+}
+
+const TextChat: React.FC = () => {
+  const [messages, setMessages] = useState<Array<{ id: string; text: string; sender: 'user' | 'ai' }>>([
+    { id: '1', text: 'Hello! I\'m BrainMate, your AI learning companion. How can I help you learn something new today?', sender: 'ai' }
+  ])
+  const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const sendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return
+
+    const newMessage = {
+      id: Date.now().toString(),
+      text: inputMessage,
+      sender: 'user' as const
+    }
+
+    setMessages(prev => [...prev, newMessage])
+    setInputMessage('')
+    setIsLoading(true)
+
+    try {
+      const chatMessages: ChatMessage[] = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }))
+      
+      chatMessages.push({ role: 'user', content: inputMessage })
+
+      const response = await sendChatMessage(chatMessages)
+      
+      const aiResponse = {
+        id: (Date.now() + 1).toString(),
+        text: response,
+        sender: 'ai' as const
+      }
+      
+      setMessages(prev => [...prev, aiResponse])
+    } catch (error) {
+      const errorMessage = {
+        id: (Date.now() + 1).toString(),
+        text: 'Sorry, I encountered an error. Please try again.',
+        sender: 'ai' as const
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col h-[600px]">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto space-y-4 p-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
+              {message.sender === 'ai' && (
+                <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                </div>
+              )}
+              <div
+                className={`px-4 py-3 rounded-lg ${
+                  message.sender === 'user'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-white'
+                }`}
+              >
+                {message.text}
+              </div>
+            </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
+              <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div className="px-4 py-3 rounded-lg bg-neutral-100 dark:bg-neutral-700">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
+        <div className="flex gap-2">
+          <Input
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="Ask BrainMate anything..."
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+            className="flex-1"
+            disabled={isLoading}
+          />
+          <Button onClick={sendMessage} disabled={isLoading || !inputMessage.trim()}>
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -335,13 +471,9 @@ export const BrainMate: React.FC = () => {
   const [conversation, setConversation] = useState<IConversation | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chatMode, setChatMode] = useState<'video' | 'text'>('text')
+  const [chatMode, setChatMode] = useState<'video' | 'text'>('video')
   const [permissionsGranted, setPermissionsGranted] = useState(false)
   const [permissionError, setPermissionError] = useState<string | null>(null)
-  const [messages, setMessages] = useState<Array<{ id: string; text: string; sender: 'user' | 'ai' }>>([
-    { id: '1', text: 'Hello! I\'m BrainMate, your AI learning companion. How can I help you today?', sender: 'ai' }
-  ])
-  const [inputMessage, setInputMessage] = useState('')
   const DailyCall = useDaily()
 
   const apiKey = import.meta.env.VITE_TAVUS_API_KEY
@@ -378,7 +510,6 @@ export const BrainMate: React.FC = () => {
           startAudioOff: false
         })
         setConversation(newConversation)
-        setChatMode('video')
       } catch (error) {
         setError(`Failed to start video call: ${error}`)
       }
@@ -392,211 +523,139 @@ export const BrainMate: React.FC = () => {
       endConversation(conversation.conversation_id, apiKey)
     }
     setConversation(null)
-    setChatMode('text')
-  }
-
-  const sendMessage = () => {
-    if (!inputMessage.trim()) return
-
-    const newMessage = {
-      id: Date.now().toString(),
-      text: inputMessage,
-      sender: 'user' as const
-    }
-
-    setMessages(prev => [...prev, newMessage])
-    setInputMessage('')
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = {
-        id: (Date.now() + 1).toString(),
-        text: 'That\'s a great question! Let me help you understand that concept better. Would you like me to explain it step by step?',
-        sender: 'ai' as const
-      }
-      setMessages(prev => [...prev, aiResponse])
-    }, 1000)
   }
 
   const switchToVideoMode = () => {
-    if (permissionsGranted) {
+    setChatMode('video')
+    if (permissionsGranted && !conversation) {
       startVideoCall()
-    } else {
-      setChatMode('video')
+    }
+  }
+
+  const switchToTextMode = () => {
+    setChatMode('text')
+    if (conversation) {
+      endVideoCall()
     }
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">BrainMate</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">BrainMate</h1>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion</p>
+        </div>
         <div className="flex gap-2">
+          <Button
+            variant={chatMode === 'video' ? 'primary' : 'outline'}
+            size="sm"
+            onClick={switchToVideoMode}
+            disabled={loading}
+          >
+            <Video className="w-4 h-4 mr-2" />
+            Video Chat
+          </Button>
           <Button
             variant={chatMode === 'text' ? 'primary' : 'outline'}
             size="sm"
-            onClick={() => setChatMode('text')}
+            onClick={switchToTextMode}
           >
             <MessageCircle className="w-4 h-4 mr-2" />
             Text Chat
           </Button>
-          <Button
-            variant={chatMode === 'video' ? 'primary' : 'outline'}
-            size="sm"
-            onClick={() => chatMode === 'video' ? endVideoCall() : switchToVideoMode()}
-            disabled={loading}
-          >
-            {loading ? 'Connecting...' : chatMode === 'video' && conversation ? 'End Video' : 'Video Chat'}
-          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chat Area */}
-        <div className="lg:col-span-2">
-          <Card className="h-[600px]">
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                {chatMode === 'video' ? 'Video Chat' : 'Text Chat'}
-              </h2>
-            </CardHeader>
-            <CardContent className="flex flex-col h-full">
-              {chatMode === 'video' ? (
-                <>
-                  {!permissionsGranted ? (
-                    <MediaPermissions 
-                      onPermissionsGranted={handlePermissionsGranted}
-                      onPermissionsDenied={handlePermissionsDenied}
-                    />
-                  ) : conversation ? (
-                    <VideoCall onLeave={endVideoCall} />
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                      <Button onClick={startVideoCall} disabled={loading}>
-                        {loading ? (
-                          <>
-                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                            Starting Video Call...
-                          </>
-                        ) : (
-                          <>
-                            <Camera className="w-4 h-4 mr-2" />
-                            Start Video Call
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
-                </>
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          {chatMode === 'video' ? (
+            <div className="p-6">
+              {!permissionsGranted ? (
+                <MediaPermissions 
+                  onPermissionsGranted={handlePermissionsGranted}
+                  onPermissionsDenied={handlePermissionsDenied}
+                />
+              ) : conversation ? (
+                <VideoCall onLeave={endVideoCall} />
               ) : (
-                <>
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            message.sender === 'user'
-                              ? 'bg-primary-600 text-white'
-                              : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-white'
-                          }`}
-                        >
-                          {message.text}
-                        </div>
-                      </div>
-                    ))}
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
                   </div>
-
-                  {/* Input */}
-                  <div className="flex gap-2">
-                    <Input
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      placeholder="Ask BrainMate anything..."
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                      className="flex-1"
-                    />
-                    <Button onClick={sendMessage} size="sm">
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {(error || permissionError) && (
-                <div className="mt-4 p-3 bg-error-50 border border-error-200 text-error-700 rounded-lg dark:bg-error-900/20 dark:border-error-800 dark:text-error-400 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                  <span>{error || permissionError}</span>
+                  <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
+                    Ready to start your video session?
+                  </h3>
+                  <Button onClick={startVideoCall} disabled={loading} size="lg">
+                    {loading ? (
+                      <>
+                        <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+                        Starting Video Call...
+                      </>
+                    ) : (
+                      <>
+                        <Video className="w-5 h-5 mr-3" />
+                        Start Video Session
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <h3 className="font-semibold text-neutral-900 dark:text-white">Quick Actions</h3>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                Explain a concept
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                Help with homework
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                Quiz me on topics
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                Study tips
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <h3 className="font-semibold text-neutral-900 dark:text-white">Recent Topics</h3>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                • Neural Networks
-              </div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                • Quantum Computing
-              </div>
-              <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                • Machine Learning
-              </div>
-            </CardContent>
-          </Card>
-
-          {chatMode === 'video' && (
-            <Card>
-              <CardHeader>
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Video Settings</h3>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                  {permissionsGranted ? (
-                    <div className="flex items-center gap-2 text-success-600 dark:text-success-400">
-                      <div className="w-2 h-2 bg-success-500 rounded-full"></div>
-                      Camera & Mic Ready
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-warning-600 dark:text-warning-400">
-                      <div className="w-2 h-2 bg-warning-500 rounded-full"></div>
-                      Permissions Required
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            </div>
+          ) : (
+            <TextChat />
           )}
-        </div>
+
+          {(error || permissionError) && (
+            <div className="m-6 p-4 bg-error-50 border border-error-200 text-error-700 rounded-lg dark:bg-error-900/20 dark:border-error-800 dark:text-error-400 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span>{error || permissionError}</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="p-4 text-center">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Bot className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Explain Concepts</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Get clear explanations</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="p-4 text-center">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <MessageCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Homework Help</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Get assistance with assignments</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="p-4 text-center">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <AlertCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Quiz Practice</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Test your knowledge</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="p-4 text-center">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Send className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            </div>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Study Tips</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Improve your learning</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
