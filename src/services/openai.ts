@@ -1,5 +1,9 @@
-const OPENAI_API_KEY = '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'
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
 const OPENAI_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+
+if (!OPENAI_API_KEY) {
+  throw new Error('Missing VITE_OPENAI_API_KEY environment variable')
+}
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
