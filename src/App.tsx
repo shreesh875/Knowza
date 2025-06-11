@@ -377,73 +377,143 @@ export const Call = ({ onLeave }: { onLeave: () => void }) => {
 /**
  * Main App component that manages the application state and UI
  * Handles:
- * - API token input and validation
+ * - Automatic connection using environment API key
  * - Starting/ending video calls
  * - Connection to Daily.co video service
  */
 function App() {
-  const [token, setToken] = useState("");
   const [conversation, setConversation] = useState<IConversation | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const DailyCall = useDaily();
 
-  // Start a new video call session
-  const handleStartCall = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (token && DailyCall) {
-      setLoading(true);
-      try {
-        const conversation = await createConversation(token);
-        await DailyCall.join({ url: conversation.conversation_url });
-        setConversation(conversation);
-      } catch (error) {
-        alert(`Failed to join the call. ${error}`);
-      }
-      setLoading(false);
-    } else {
-      console.error("Token is required to start the call");
+  // Get API key from environment variables
+  const apiKey = import.meta.env.VITE_TAVUS_API_KEY;
+
+  // Automatically start the call when the component mounts
+  useEffect(() => {
+    if (!apiKey) {
+      setError("Tavus API key not found in environment variables");
+      return;
     }
-  };
+
+    const startCall = async () => {
+      if (DailyCall && !conversation && !loading) {
+        setLoading(true);
+        setError(null);
+        try {
+          const newConversation = await createConversation(apiKey);
+          await DailyCall.join({ url: newConversation.conversation_url });
+          setConversation(newConversation);
+        } catch (error) {
+          setError(`Failed to join the call: ${error}`);
+        }
+        setLoading(false);
+      }
+    };
+
+    startCall();
+  }, [DailyCall, apiKey, conversation, loading]);
 
   // Clean up and end the current call
   const handleLeaveCall = () => {
     DailyCall?.leave();
-    endConversation(conversation!.conversation_id, token);
+    if (conversation) {
+      endConversation(conversation.conversation_id, apiKey);
+    }
     setConversation(null);
   };
 
-  // Mask API token for security
-  const getDisplayToken = () => {
-    return token.length > 4 ? `****${token.slice(-4)}` : token;
+  // Restart the call
+  const handleRestartCall = async () => {
+    if (DailyCall && !loading) {
+      setLoading(true);
+      setError(null);
+      try {
+        const newConversation = await createConversation(apiKey);
+        await DailyCall.join({ url: newConversation.conversation_url });
+        setConversation(newConversation);
+      } catch (error) {
+        setError(`Failed to restart the call: ${error}`);
+      }
+      setLoading(false);
+    }
   };
 
   return (
     <main>
-      <form onSubmit={handleStartCall} className="token-form">
-        <label htmlFor="token">
-          Enter your Tavus API token to start, or{" "}
-          <a
-            href="https://platform.tavus.io/api-keys"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div style={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        alignItems: "center", 
+        gap: "1rem",
+        padding: "2rem"
+      }}>
+        <h1 style={{ 
+          fontSize: "2rem", 
+          fontWeight: "bold", 
+          marginBottom: "1rem",
+          textAlign: "center"
+        }}>
+          Tavus Conversational Video Interface
+        </h1>
+        
+        {error && (
+          <div style={{
+            backgroundColor: "#fee2e2",
+            color: "#dc2626",
+            padding: "1rem",
+            borderRadius: "0.5rem",
+            border: "1px solid #fecaca",
+            maxWidth: "500px",
+            textAlign: "center"
+          }}>
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            fontSize: "1.1rem"
+          }}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ animation: "spin 1s linear infinite" }}
+            >
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+            Starting video call...
+          </div>
+        )}
+
+        {!conversation && !loading && !error && (
+          <button
+            onClick={handleRestartCall}
+            style={{
+              padding: "0.75rem 1.5rem",
+              fontSize: "1rem",
+              backgroundColor: "#3b82f6",
+              color: "white",
+              border: "none",
+              borderRadius: "0.5rem",
+              cursor: "pointer"
+            }}
           >
-            create a new one.
-          </a>
-        </label>
-        <div>
-          <input
-            id="token"
-            type="text"
-            value={conversation ? getDisplayToken() : token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Enter token"
-            disabled={!!conversation}
-          />
-          <button disabled={!token || loading || !!conversation} type="submit">
-            {loading ? "Loading..." : "Start Video Call"}
+            Start Video Call
           </button>
-        </div>
-      </form>
+        )}
+      </div>
 
       {conversation && <Call onLeave={handleLeaveCall} />}
     </main>
