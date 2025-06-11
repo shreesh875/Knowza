@@ -26,15 +26,20 @@ interface OpenRouterResponse {
 class DeepSeekService {
   private apiKey: string;
   private baseUrl = 'https://openrouter.ai/api/v1';
-  private model = 'deepseek/deepseek-chat-v3-0324:free'; // Corrected model identifier
+  private model = 'deepseek/deepseek-chat-v3-0324:free';
 
   constructor(apiKey: string) {
+    if (!apiKey) {
+      throw new Error('OpenRouter API key is required');
+    }
     this.apiKey = apiKey;
   }
 
   async sendMessage(messages: DeepSeekMessage[]): Promise<string> {
     try {
-      console.log('Sending message to DeepSeek V3 via OpenRouter:', messages);
+      console.log('Sending message to DeepSeek V3 via OpenRouter');
+      console.log('API Key present:', !!this.apiKey);
+      console.log('Model:', this.model);
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -42,7 +47,7 @@ class DeepSeekService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'AI Video Chat - DeepSeek V3',
+          'X-Title': 'BrainFeed Educational Platform',
         },
         body: JSON.stringify({
           model: this.model,
@@ -55,13 +60,17 @@ class DeepSeekService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('OpenRouter API error:', errorText);
+        console.error('OpenRouter API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        });
         throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
       }
 
       const data: OpenRouterResponse = await response.json();
-      console.log('OpenRouter response:', data);
-      console.log('Model used:', data.model); // Log which model was actually used
+      console.log('OpenRouter response received successfully');
+      console.log('Model used:', data.model);
 
       if (data.choices && data.choices.length > 0) {
         return data.choices[0].message.content;
@@ -76,7 +85,8 @@ class DeepSeekService {
 
   async streamMessage(messages: DeepSeekMessage[], onChunk: (chunk: string) => void): Promise<void> {
     try {
-      console.log('Streaming message to DeepSeek V3 via OpenRouter:', messages);
+      console.log('Streaming message to DeepSeek V3 via OpenRouter');
+      console.log('API Key present:', !!this.apiKey);
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -84,7 +94,7 @@ class DeepSeekService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'AI Video Chat - DeepSeek V3',
+          'X-Title': 'BrainFeed Educational Platform',
         },
         body: JSON.stringify({
           model: this.model,
@@ -97,7 +107,11 @@ class DeepSeekService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('OpenRouter API error:', errorText);
+        console.error('OpenRouter API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        });
         throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
       }
 

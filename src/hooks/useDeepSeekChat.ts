@@ -1,16 +1,39 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import DeepSeekService, { DeepSeekMessage } from '../services/deepSeekService';
 import { ConversationMessage } from '../types/tavus';
 
-export const useDeepSeekChat = (apiKey: string) => {
+export const useDeepSeekChat = (apiKey: string | null) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [deepSeekService] = useState(() => new DeepSeekService(apiKey));
+  
+  const deepSeekService = useMemo(() => {
+    if (!apiKey) {
+      console.warn('No OpenRouter API key provided');
+      return null;
+    }
+    try {
+      return new DeepSeekService(apiKey);
+    } catch (error) {
+      console.error('Failed to create DeepSeekService:', error);
+      return null;
+    }
+  }, [apiKey]);
 
   const sendMessage = useCallback(async (
     messages: ConversationMessage[],
     onResponse: (response: ConversationMessage) => void,
     onStreamChunk?: (chunk: string) => void
   ) => {
+    if (!deepSeekService) {
+      const errorMessage: ConversationMessage = {
+        id: Date.now().toString(),
+        content: 'OpenRouter API key is not configured. Please check your environment variables.',
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      onResponse(errorMessage);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -18,13 +41,17 @@ export const useDeepSeekChat = (apiKey: string) => {
       const deepSeekMessages: DeepSeekMessage[] = [
         {
           role: 'system',
-          content: `You are DeepSeek V3, an advanced AI assistant. When greeting users or introducing yourself, use one of these casual, engaging styles:
+          content: `You are BrainMate, an AI learning companion powered by DeepSeek V3. You're part of an educational platform called BrainFeed where users explore academic content, research papers, and educational videos.
 
-- "Hey there! 👋 Got a question about one of your favorite topics? Let's dive into something cool."
-- "Welcome back! If you've just read a post, feel free to ask me anything about it—I'm here to help you go deeper."
-- "👋 Welcome! I'm here to boost your streak and your brain. Ask away—what are you curious about today?"
+Your role is to:
+- Help users understand concepts from their feed content
+- Answer questions related to their recent learning topics  
+- Create personalized quizzes based on their interests
+- Provide study tips and learning strategies
+- Explain complex topics in simple, digestible terms
+- Act as a supportive learning buddy and coach
 
-You are helpful, harmless, and honest. You're part of a video chat application where users can also interact with an AI avatar through video. Keep your responses engaging and conversational, focusing on helping users explore topics they're curious about.`
+Keep your responses engaging, educational, and encouraging. Reference the user's learning context when relevant. Be conversational but informative.`
         },
         ...messages.map(msg => ({
           role: msg.role as 'user' | 'assistant',
@@ -82,5 +109,6 @@ You are helpful, harmless, and honest. You're part of a video chat application w
   return {
     sendMessage,
     isLoading,
+    isConfigured: !!deepSeekService,
   };
 };

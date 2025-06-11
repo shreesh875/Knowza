@@ -384,7 +384,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Initialize DeepSeek chat hook
-  const { sendMessage: sendDeepSeekMessage, isLoading } = useDeepSeekChat(openRouterApiKey)
+  const { sendMessage: sendDeepSeekMessage, isLoading, isConfigured } = useDeepSeekChat(openRouterApiKey)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -395,7 +395,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   }, [messages, streamingResponse])
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || isLoading || !openRouterApiKey) return
+    if (!inputMessage.trim() || isLoading || !openRouterApiKey || !isConfigured) return
 
     const userMessage: ConversationMessage = {
       id: Date.now().toString(),
@@ -439,7 +439,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
     setInputMessage(message)
   }
 
-  if (!openRouterApiKey) {
+  if (!openRouterApiKey || !isConfigured) {
     return (
       <div className="flex items-center justify-center h-[700px]">
         <div className="text-center">
@@ -450,6 +450,12 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
           <p className="text-neutral-600 dark:text-neutral-400 max-w-md">
             To use the text chat feature, please add your OpenRouter API key to the environment variables as VITE_OPENROUTER_API_KEY.
           </p>
+          <div className="mt-4 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-left">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Expected API key format:</p>
+            <code className="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded">
+              sk-or-v1-...
+            </code>
+          </div>
         </div>
       </div>
     )
@@ -676,10 +682,11 @@ export const BrainMate: React.FC = () => {
     }
 
     const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+    console.log('OpenRouter API Key from env:', envOpenRouterApiKey ? 'Present' : 'Missing')
     if (envOpenRouterApiKey) {
       setOpenRouterApiKey(envOpenRouterApiKey)
     } else {
-      setError('OpenRouter API key not found. Please add VITE_OPENROUTER_API_KEY to your .env file.')
+      console.warn('OpenRouter API key not found in environment variables')
     }
   }, [])
 
