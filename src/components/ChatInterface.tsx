@@ -13,7 +13,6 @@ interface ChatInterfaceProps {
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messages,
   onSendMessage,
-  isConnected,
   isAiTyping = false,
   streamingResponse = '',
 }) => {
