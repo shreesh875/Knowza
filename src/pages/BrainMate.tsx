@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, DailyAudio } from '@daily-co/daily-react'
-import { Mic, MicOff, PhoneOff, MessageCircle, Send } from 'lucide-react'
+import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
+import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -8,7 +8,7 @@ import { createConversation } from '../api/createConversation'
 import { endConversation } from '../api/endConversation'
 import type { IConversation } from '../types'
 
-// WebGL Shader Programs for Chroma Key Effect (same as original)
+// WebGL Shader Programs for Chroma Key Effect
 const vertexShaderSource = `
   attribute vec2 a_position;
   attribute vec2 a_texCoord;
@@ -166,7 +166,7 @@ const Video: React.FC<{ id: string }> = ({ id }) => {
   }, [isVideoReady, webGLContext])
 
   return (
-    <div className="relative w-full h-64 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
+    <div className="relative w-full h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
       <DailyVideo
         sessionId={id}
         type="video"
@@ -181,15 +181,97 @@ const Video: React.FC<{ id: string }> = ({ id }) => {
   )
 }
 
+interface MediaPermissionsProps {
+  onPermissionsGranted: () => void
+  onPermissionsDenied: (error: string) => void
+}
+
+const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGranted, onPermissionsDenied }) => {
+  const [requesting, setRequesting] = useState(false)
+
+  const requestPermissions = async () => {
+    setRequesting(true)
+    try {
+      // Request both audio and video permissions
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true
+      })
+      
+      // Stop the stream immediately as we just needed to check permissions
+      stream.getTracks().forEach(track => track.stop())
+      
+      onPermissionsGranted()
+    } catch (error: any) {
+      let errorMessage = 'Failed to access camera and microphone'
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = 'Camera and microphone access denied. Please allow access and try again.'
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = 'No camera or microphone found on this device.'
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = 'Camera or microphone is already in use by another application.'
+      }
+      
+      onPermissionsDenied(errorMessage)
+    } finally {
+      setRequesting(false)
+    }
+  }
+
+  return (
+    <div className="text-center p-8">
+      <div className="mb-6">
+        <Camera className="w-16 h-16 text-primary-600 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
+          Camera and Microphone Access Required
+        </h3>
+        <p className="text-neutral-600 dark:text-neutral-400">
+          BrainMate needs access to your camera and microphone to provide the best video chat experience.
+        </p>
+      </div>
+      
+      <Button 
+        onClick={requestPermissions} 
+        disabled={requesting}
+        className="mb-4"
+      >
+        {requesting ? (
+          <>
+            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+            Requesting Access...
+          </>
+        ) : (
+          <>
+            <Camera className="w-4 h-4 mr-2" />
+            Allow Camera & Microphone
+          </>
+        )}
+      </Button>
+      
+      <div className="text-xs text-neutral-500 dark:text-neutral-400">
+        Your privacy is important. We only use your camera and microphone for video calls.
+      </div>
+    </div>
+  )
+}
+
 const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
   const remoteParticipantIds = useParticipantIds({ filter: 'remote' })
   const localParticipantId = useLocalSessionId()
   const localAudio = useAudioTrack(localParticipantId)
+  const localVideo = useVideoTrack(localParticipantId)
   const daily = useDaily()
+  
   const isMicEnabled = !localAudio.isOff
+  const isCameraEnabled = !localVideo.isOff
 
   const toggleMicrophone = () => {
     daily?.setLocalAudio(!isMicEnabled)
+  }
+
+  const toggleCamera = () => {
+    daily?.setLocalVideo(!isCameraEnabled)
   }
 
   return (
@@ -197,10 +279,28 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
       {remoteParticipantIds.length > 0 ? (
         <Video id={remoteParticipantIds[0]} />
       ) : (
-        <div className="w-full h-64 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
+        <div className="w-full h-96 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-2"></div>
             <p className="text-neutral-600 dark:text-neutral-400">Connecting to BrainMate...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Local video preview */}
+      {localParticipantId && (
+        <div className="relative">
+          <div className="absolute top-4 right-4 w-32 h-24 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10">
+            <DailyVideo
+              sessionId={localParticipantId}
+              type="video"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            {!isCameraEnabled && (
+              <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
+                <CameraOff className="w-6 h-6 text-neutral-400" />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -213,6 +313,15 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
         >
           {isMicEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
         </Button>
+        
+        <Button
+          variant={isCameraEnabled ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={toggleCamera}
+        >
+          {isCameraEnabled ? <Camera className="w-4 h-4" /> : <CameraOff className="w-4 h-4" />}
+        </Button>
+        
         <Button variant="outline" size="sm" onClick={onLeave}>
           <PhoneOff className="w-4 h-4" />
         </Button>
@@ -226,7 +335,9 @@ export const BrainMate: React.FC = () => {
   const [conversation, setConversation] = useState<IConversation | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chatMode, setChatMode] = useState<'video' | 'text'>('video')
+  const [chatMode, setChatMode] = useState<'video' | 'text'>('text')
+  const [permissionsGranted, setPermissionsGranted] = useState(false)
+  const [permissionError, setPermissionError] = useState<string | null>(null)
   const [messages, setMessages] = useState<Array<{ id: string; text: string; sender: 'user' | 'ai' }>>([
     { id: '1', text: 'Hello! I\'m BrainMate, your AI learning companion. How can I help you today?', sender: 'ai' }
   ])
@@ -235,9 +346,24 @@ export const BrainMate: React.FC = () => {
 
   const apiKey = import.meta.env.VITE_TAVUS_API_KEY
 
+  const handlePermissionsGranted = () => {
+    setPermissionsGranted(true)
+    setPermissionError(null)
+  }
+
+  const handlePermissionsDenied = (errorMessage: string) => {
+    setPermissionError(errorMessage)
+    setPermissionsGranted(false)
+  }
+
   const startVideoCall = async () => {
     if (!apiKey) {
       setError('Tavus API key not found in environment variables')
+      return
+    }
+
+    if (!permissionsGranted) {
+      setError('Camera and microphone permissions are required for video calls')
       return
     }
 
@@ -246,7 +372,11 @@ export const BrainMate: React.FC = () => {
       setError(null)
       try {
         const newConversation = await createConversation(apiKey)
-        await DailyCall.join({ url: newConversation.conversation_url })
+        await DailyCall.join({ 
+          url: newConversation.conversation_url,
+          startVideoOff: false,
+          startAudioOff: false
+        })
         setConversation(newConversation)
         setChatMode('video')
       } catch (error) {
@@ -288,6 +418,14 @@ export const BrainMate: React.FC = () => {
     }, 1000)
   }
 
+  const switchToVideoMode = () => {
+    if (permissionsGranted) {
+      startVideoCall()
+    } else {
+      setChatMode('video')
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -304,10 +442,10 @@ export const BrainMate: React.FC = () => {
           <Button
             variant={chatMode === 'video' ? 'primary' : 'outline'}
             size="sm"
-            onClick={() => chatMode === 'video' ? endVideoCall() : startVideoCall()}
+            onClick={() => chatMode === 'video' ? endVideoCall() : switchToVideoMode()}
             disabled={loading}
           >
-            {loading ? 'Connecting...' : chatMode === 'video' ? 'End Video' : 'Video Chat'}
+            {loading ? 'Connecting...' : chatMode === 'video' && conversation ? 'End Video' : 'Video Chat'}
           </Button>
         </div>
       </div>
@@ -315,15 +453,40 @@ export const BrainMate: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chat Area */}
         <div className="lg:col-span-2">
-          <Card className="h-96">
+          <Card className="h-[600px]">
             <CardHeader>
               <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
                 {chatMode === 'video' ? 'Video Chat' : 'Text Chat'}
               </h2>
             </CardHeader>
             <CardContent className="flex flex-col h-full">
-              {chatMode === 'video' && conversation ? (
-                <VideoCall onLeave={endVideoCall} />
+              {chatMode === 'video' ? (
+                <>
+                  {!permissionsGranted ? (
+                    <MediaPermissions 
+                      onPermissionsGranted={handlePermissionsGranted}
+                      onPermissionsDenied={handlePermissionsDenied}
+                    />
+                  ) : conversation ? (
+                    <VideoCall onLeave={endVideoCall} />
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                      <Button onClick={startVideoCall} disabled={loading}>
+                        {loading ? (
+                          <>
+                            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                            Starting Video Call...
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-4 h-4 mr-2" />
+                            Start Video Call
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   {/* Messages */}
@@ -362,9 +525,10 @@ export const BrainMate: React.FC = () => {
                 </>
               )}
 
-              {error && (
-                <div className="mt-4 p-3 bg-error-50 border border-error-200 text-error-700 rounded-lg dark:bg-error-900/20 dark:border-error-800 dark:text-error-400">
-                  {error}
+              {(error || permissionError) && (
+                <div className="mt-4 p-3 bg-error-50 border border-error-200 text-error-700 rounded-lg dark:bg-error-900/20 dark:border-error-800 dark:text-error-400 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <span>{error || permissionError}</span>
                 </div>
               )}
             </CardContent>
@@ -409,6 +573,29 @@ export const BrainMate: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {chatMode === 'video' && (
+            <Card>
+              <CardHeader>
+                <h3 className="font-semibold text-neutral-900 dark:text-white">Video Settings</h3>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                  {permissionsGranted ? (
+                    <div className="flex items-center gap-2 text-success-600 dark:text-success-400">
+                      <div className="w-2 h-2 bg-success-500 rounded-full"></div>
+                      Camera & Mic Ready
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-warning-600 dark:text-warning-400">
+                      <div className="w-2 h-2 bg-warning-500 rounded-full"></div>
+                      Permissions Required
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
