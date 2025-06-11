@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
-import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot } from 'lucide-react'
+import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -167,7 +167,7 @@ const VideoComponent: React.FC<{ id: string }> = ({ id }) => {
   }, [isVideoReady, webGLContext])
 
   return (
-    <div className="relative w-full h-[500px] bg-neutral-100 dark:bg-neutral-800 rounded-lg overflow-hidden">
+    <div className="relative w-full h-[600px] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl overflow-hidden border border-primary-200 dark:border-primary-800">
       <DailyVideo
         sessionId={id}
         type="video"
@@ -220,22 +220,36 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
   return (
     <div className="text-center p-12">
       <div className="mb-8">
-        <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Camera className="w-12 h-12 text-primary-600 dark:text-primary-400" />
+        <div className="w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
+          <Bot className="w-16 h-16 text-primary-600 dark:text-primary-400" />
         </div>
-        <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
-          Ready to Meet BrainMate?
+        <h3 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
+          Meet Your Learning Companion
         </h3>
-        <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-md mx-auto">
-          BrainMate needs access to your camera and microphone to provide the best video learning experience.
+        <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-lg mx-auto mb-6">
+          BrainMate is ready to help you understand concepts from your feed, answer questions, and guide your learning journey through interactive video conversations.
         </p>
+        <div className="flex items-center justify-center gap-6 text-sm text-neutral-500 dark:text-neutral-400 mb-8">
+          <div className="flex items-center gap-2">
+            <Brain className="w-4 h-4 text-primary-600" />
+            <span>Context-Aware</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-primary-600" />
+            <span>Feed Integration</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-primary-600" />
+            <span>Personalized</span>
+          </div>
+        </div>
       </div>
       
       <Button 
         onClick={requestPermissions} 
         disabled={requesting}
         size="lg"
-        className="mb-6"
+        className="mb-6 px-8 py-4 text-lg"
       >
         {requesting ? (
           <>
@@ -245,13 +259,13 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
         ) : (
           <>
             <Camera className="w-5 h-5 mr-3" />
-            Allow Camera & Microphone
+            Start Video Session
           </>
         )}
       </Button>
       
       <div className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
-        Your privacy is important. We only use your camera and microphone for video calls and never store or share your data.
+        Your privacy is protected. We only use your camera and microphone for video calls and never store or share your data.
       </div>
     </div>
   )
@@ -280,14 +294,14 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
       {remoteParticipantIds.length > 0 ? (
         <VideoComponent id={remoteParticipantIds[0]} />
       ) : (
-        <div className="w-full h-[500px] bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
+        <div className="w-full h-[600px] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl flex items-center justify-center border border-primary-200 dark:border-primary-800">
           <div className="text-center">
-            <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Bot className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+            <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
+              <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
             </div>
             <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-neutral-600 dark:text-neutral-400 text-lg">Connecting to BrainMate...</p>
-            <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">This may take a few moments</p>
+            <p className="text-neutral-600 dark:text-neutral-400 text-xl font-medium">Connecting to BrainMate...</p>
+            <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">Preparing your personalized learning session</p>
           </div>
         </div>
       )}
@@ -295,7 +309,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
       {/* Local video preview */}
       {localParticipantId && (
         <div className="relative">
-          <div className="absolute top-4 right-4 w-40 h-32 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10">
+          <div className="absolute top-4 right-4 w-48 h-36 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10">
             <DailyVideo
               sessionId={localParticipantId}
               type="video"
@@ -315,7 +329,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
           variant={isMicEnabled ? 'primary' : 'secondary'}
           size="lg"
           onClick={toggleMicrophone}
-          className="w-14 h-14 rounded-full"
+          className="w-16 h-16 rounded-full"
         >
           {isMicEnabled ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
         </Button>
@@ -324,7 +338,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
           variant={isCameraEnabled ? 'primary' : 'secondary'}
           size="lg"
           onClick={toggleCamera}
-          className="w-14 h-14 rounded-full"
+          className="w-16 h-16 rounded-full"
         >
           {isCameraEnabled ? <Camera className="w-6 h-6" /> : <CameraOff className="w-6 h-6" />}
         </Button>
@@ -333,7 +347,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
           variant="outline" 
           size="lg" 
           onClick={onLeave}
-          className="w-14 h-14 rounded-full border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+          className="w-16 h-16 rounded-full border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
         >
           <PhoneOff className="w-6 h-6" />
         </Button>
@@ -343,9 +357,22 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
   )
 }
 
+// Mock recent feed topics for context
+const recentFeedTopics = [
+  'Neural Networks and Deep Learning',
+  'Quantum Computing Applications',
+  'Machine Learning Algorithms',
+  'Artificial Intelligence Ethics',
+  'Data Science Fundamentals'
+]
+
 const TextChat: React.FC = () => {
   const [messages, setMessages] = useState<Array<{ id: string; text: string; sender: 'user' | 'ai' }>>([
-    { id: '1', text: 'Hello! I\'m BrainMate, your AI learning companion. How can I help you learn something new today?', sender: 'ai' }
+    { 
+      id: '1', 
+      text: `Hello! I'm BrainMate, your AI learning companion. I've noticed you've been exploring topics like ${recentFeedTopics.slice(0, 2).join(' and ')} in your feed. I'm here to help you understand these concepts better, answer questions, or even create personalized quizzes. What would you like to explore today?`, 
+      sender: 'ai' 
+    }
   ])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -380,7 +407,7 @@ const TextChat: React.FC = () => {
       
       chatMessages.push({ role: 'user', content: inputMessage })
 
-      const response = await sendChatMessage(chatMessages)
+      const response = await sendChatMessage(chatMessages, recentFeedTopics)
       
       const aiResponse = {
         id: (Date.now() + 1).toString(),
@@ -401,10 +428,47 @@ const TextChat: React.FC = () => {
     }
   }
 
+  const handleQuickAction = (action: string) => {
+    let message = ''
+    switch (action) {
+      case 'explain':
+        message = `Can you explain one of the recent topics from my feed in simple terms?`
+        break
+      case 'quiz':
+        message = `Create a quick quiz based on the topics I've been reading about.`
+        break
+      case 'homework':
+        message = `I need help understanding a concept from my recent feed content.`
+        break
+      case 'tips':
+        message = `Give me study tips for the topics I've been exploring.`
+        break
+    }
+    setInputMessage(message)
+  }
+
   return (
-    <div className="flex flex-col h-[600px]">
+    <div className="flex flex-col h-[700px]">
+      {/* Context Banner */}
+      <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-4">
+        <div className="flex items-center gap-3 mb-2">
+          <Brain className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          <h3 className="font-medium text-primary-900 dark:text-primary-100">Context from Your Feed</h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {recentFeedTopics.slice(0, 3).map((topic, index) => (
+            <span
+              key={index}
+              className="px-3 py-1 text-xs font-medium bg-primary-100 text-primary-700 rounded-full dark:bg-primary-900/40 dark:text-primary-300"
+            >
+              {topic}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 p-4">
+      <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -420,7 +484,7 @@ const TextChat: React.FC = () => {
                 className={`px-4 py-3 rounded-lg ${
                   message.sender === 'user'
                     ? 'bg-primary-600 text-white'
-                    : 'bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-white'
+                    : 'bg-white text-neutral-900 dark:bg-neutral-700 dark:text-white shadow-sm'
                 }`}
               >
                 {message.text}
@@ -434,7 +498,7 @@ const TextChat: React.FC = () => {
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="px-4 py-3 rounded-lg bg-neutral-100 dark:bg-neutral-700">
+              <div className="px-4 py-3 rounded-lg bg-white dark:bg-neutral-700 shadow-sm">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -447,13 +511,45 @@ const TextChat: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg mb-4">
+        <button
+          onClick={() => handleQuickAction('explain')}
+          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+        >
+          <Lightbulb className="w-4 h-4 text-yellow-500" />
+          <span>Explain</span>
+        </button>
+        <button
+          onClick={() => handleQuickAction('quiz')}
+          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+        >
+          <Target className="w-4 h-4 text-green-500" />
+          <span>Quiz Me</span>
+        </button>
+        <button
+          onClick={() => handleQuickAction('homework')}
+          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+        >
+          <HelpCircle className="w-4 h-4 text-blue-500" />
+          <span>Help</span>
+        </button>
+        <button
+          onClick={() => handleQuickAction('tips')}
+          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+        >
+          <TrendingUp className="w-4 h-4 text-purple-500" />
+          <span>Tips</span>
+        </button>
+      </div>
+
       {/* Input */}
       <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
         <div className="flex gap-2">
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Ask BrainMate anything..."
+            placeholder="Ask about your feed content, request explanations, or get study help..."
             onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
             className="flex-1"
             disabled={isLoading}
@@ -543,8 +639,13 @@ export const BrainMate: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">BrainMate</h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion</p>
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+              <Bot className="w-6 h-6 text-white" />
+            </div>
+            BrainMate
+          </h1>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your context-aware learning companion</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -579,18 +680,21 @@ export const BrainMate: React.FC = () => {
               ) : conversation ? (
                 <VideoCall onLeave={endVideoCall} />
               ) : (
-                <div className="text-center py-12">
-                  <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
+                <div className="text-center py-16">
+                  <div className="w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
+                    <Bot className="w-16 h-16 text-primary-600 dark:text-primary-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
-                    Ready to start your video session?
+                  <h3 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">
+                    Ready for your learning session?
                   </h3>
-                  <Button onClick={startVideoCall} disabled={loading} size="lg">
+                  <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-md mx-auto">
+                    Start a video conversation with BrainMate to discuss topics from your feed and get personalized learning assistance.
+                  </p>
+                  <Button onClick={startVideoCall} disabled={loading} size="lg" className="px-8 py-4">
                     {loading ? (
                       <>
                         <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
-                        Starting Video Call...
+                        Starting Session...
                       </>
                     ) : (
                       <>
@@ -603,7 +707,9 @@ export const BrainMate: React.FC = () => {
               )}
             </div>
           ) : (
-            <TextChat />
+            <div className="p-6">
+              <TextChat />
+            </div>
           )}
 
           {(error || permissionError) && (
@@ -615,45 +721,45 @@ export const BrainMate: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
+      {/* Learning Features Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
           <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Bot className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Explain Concepts</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Get clear explanations</p>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Feed Context</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Discusses your recent content</p>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
           <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <MessageCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <Target className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Homework Help</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Get assistance with assignments</p>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Personalized Quizzes</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Based on your interests</p>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
           <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <AlertCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <Brain className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Quiz Practice</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Test your knowledge</p>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Concept Explanations</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Simplified learning</p>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
           <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Send className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Study Tips</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Improve your learning</p>
+            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Progress Tracking</h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Monitor your growth</p>
           </CardContent>
         </Card>
       </div>

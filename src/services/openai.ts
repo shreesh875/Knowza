@@ -6,8 +6,23 @@ export interface ChatMessage {
   content: string
 }
 
-export const sendChatMessage = async (messages: ChatMessage[]): Promise<string> => {
+export const sendChatMessage = async (messages: ChatMessage[], feedContext?: string[]): Promise<string> => {
   try {
+    // Create context-aware system prompt
+    const contextPrompt = feedContext && feedContext.length > 0 
+      ? `You are BrainMate, an AI learning companion integrated with an educational platform. The user has been exploring these topics in their feed: ${feedContext.join(', ')}. 
+
+Your role is to:
+- Help users understand concepts from their feed content
+- Answer questions related to their recent learning topics
+- Create personalized quizzes based on their interests
+- Provide study tips and learning strategies
+- Explain complex topics in simple, digestible terms
+- Act as a supportive learning buddy and coach
+
+Always reference their feed context when relevant and provide educational, encouraging responses. Keep responses concise but informative.`
+      : `You are BrainMate, an AI learning companion designed to help students learn and understand complex topics. You are knowledgeable, patient, encouraging, and always ready to explain concepts in simple terms. You can help with homework, explain difficult concepts, provide study tips, and engage in educational discussions. Keep your responses helpful, concise, and educational.`
+
     const response = await fetch(OPENAI_API_URL, {
       method: 'POST',
       headers: {
@@ -21,7 +36,7 @@ export const sendChatMessage = async (messages: ChatMessage[]): Promise<string> 
         messages: [
           {
             role: 'system',
-            content: 'You are BrainMate, an AI learning companion designed to help students learn and understand complex topics. You are knowledgeable, patient, encouraging, and always ready to explain concepts in simple terms. You can help with homework, explain difficult concepts, provide study tips, and engage in educational discussions. Keep your responses helpful, concise, and educational.'
+            content: contextPrompt
           },
           ...messages
         ],
