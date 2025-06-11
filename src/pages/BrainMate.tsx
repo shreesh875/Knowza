@@ -374,7 +374,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
-      content: `Hey there! 👋 I'm BrainMate, your AI learning companion powered by DeepSeek V3. I've noticed you've been exploring topics like ${recentFeedTopics.slice(0, 2).join(' and ')} in your feed. I'm here to help you understand these concepts better, answer questions, or even create personalized quizzes. What would you like to explore today?`, 
+      content: `Hi! I'm BrainMate, your AI learning companion. I can help you understand concepts, answer questions, and create quizzes based on your feed content. What would you like to explore?`, 
       role: 'assistant',
       timestamp: new Date()
     }
@@ -770,7 +770,7 @@ export const BrainMate: React.FC = () => {
             </div>
             BrainMate
           </h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your context-aware learning companion powered by DeepSeek V3</p>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion</p>
         </div>
         <div className="flex gap-2">
           <Button
