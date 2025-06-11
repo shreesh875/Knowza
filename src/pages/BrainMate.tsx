@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
 import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle, Settings } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '../components/ui/Card'
+import { Card, CardContent } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { createConversation } from '../api/createConversation'
