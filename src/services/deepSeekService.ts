@@ -64,7 +64,7 @@ class DeepSeekService {
         model: this.model,
         messages: messages,
         temperature: 0.7,
-        max_tokens: 2048,
+        max_tokens: 4096,
         stream: false,
       };
 
@@ -134,7 +134,7 @@ class DeepSeekService {
         model: this.model,
         messages: messages,
         temperature: 0.7,
-        max_tokens: 2048,
+        max_tokens: 4096,
         stream: true,
       };
 
