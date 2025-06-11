@@ -6,8 +6,11 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { createConversation } from '../api/createConversation'
 import { endConversation } from '../api/endConversation'
-import { sendChatMessage, type ChatMessage } from '../services/openai'
-import type { IConversation } from '../types'
+import { useDeepSeekChat } from '../hooks/useDeepSeekChat'
+import type { IConversation, ConversationMessage } from '../types/tavus'
+
+// OpenRouter API Key for DeepSeek V3
+const OPENROUTER_API_KEY = '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'
 
 // WebGL Shader Programs for Chroma Key Effect
 const vertexShaderSource = `
@@ -367,16 +370,20 @@ const recentFeedTopics = [
 ]
 
 const TextChat: React.FC = () => {
-  const [messages, setMessages] = useState<Array<{ id: string; text: string; sender: 'user' | 'ai' }>>([
+  const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
-      text: `Hello! I'm BrainMate, your AI learning companion. I've noticed you've been exploring topics like ${recentFeedTopics.slice(0, 2).join(' and ')} in your feed. I'm here to help you understand these concepts better, answer questions, or even create personalized quizzes. What would you like to explore today?`, 
-      sender: 'ai' 
+      content: `Hey there! 👋 I'm BrainMate, your AI learning companion powered by DeepSeek V3. I've noticed you've been exploring topics like ${recentFeedTopics.slice(0, 2).join(' and ')} in your feed. I'm here to help you understand these concepts better, answer questions, or even create personalized quizzes. What would you like to explore today?`, 
+      role: 'assistant',
+      timestamp: new Date()
     }
   ])
   const [inputMessage, setInputMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [streamingResponse, setStreamingResponse] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Initialize DeepSeek chat hook
+  const { sendMessage: sendDeepSeekMessage, isLoading } = useDeepSeekChat(OPENROUTER_API_KEY)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -384,48 +391,32 @@ const TextChat: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, streamingResponse])
 
-  const sendMessage = async () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
 
-    const newMessage = {
+    const userMessage: ConversationMessage = {
       id: Date.now().toString(),
-      text: inputMessage,
-      sender: 'user' as const
+      content: inputMessage,
+      role: 'user',
+      timestamp: new Date()
     }
 
-    setMessages(prev => [...prev, newMessage])
+    setMessages(prev => [...prev, userMessage])
     setInputMessage('')
-    setIsLoading(true)
 
-    try {
-      const chatMessages: ChatMessage[] = messages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
-      }))
-      
-      chatMessages.push({ role: 'user', content: inputMessage })
-
-      const response = await sendChatMessage(chatMessages, recentFeedTopics)
-      
-      const aiResponse = {
-        id: (Date.now() + 1).toString(),
-        text: response,
-        sender: 'ai' as const
+    // Send to DeepSeek AI via OpenRouter for chat response
+    await sendDeepSeekMessage(
+      [...messages, userMessage],
+      (aiResponse) => {
+        setMessages(prev => [...prev, aiResponse])
+        setStreamingResponse('')
+      },
+      (chunk) => {
+        setStreamingResponse(prev => prev + chunk)
       }
-      
-      setMessages(prev => [...prev, aiResponse])
-    } catch (error) {
-      const errorMessage = {
-        id: (Date.now() + 1).toString(),
-        text: 'Sorry, I encountered an error. Please try again.',
-        sender: 'ai' as const
-      }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
   const handleQuickAction = (action: string) => {
@@ -472,27 +463,43 @@ const TextChat: React.FC = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
-              {message.sender === 'ai' && (
+              {message.role === 'assistant' && (
                 <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
               )}
               <div
                 className={`px-4 py-3 rounded-lg ${
-                  message.sender === 'user'
+                  message.role === 'user'
                     ? 'bg-primary-600 text-white'
                     : 'bg-white text-neutral-900 dark:bg-neutral-700 dark:text-white shadow-sm'
                 }`}
               >
-                {message.text}
+                {message.content}
               </div>
             </div>
           </div>
         ))}
-        {isLoading && (
+        
+        {/* Streaming response */}
+        {streamingResponse && (
+          <div className="flex justify-start">
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
+              <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div className="px-4 py-3 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white">
+                {streamingResponse}
+                <span className="animate-pulse">|</span>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {isLoading && !streamingResponse && (
           <div className="flex justify-start">
             <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -550,11 +557,11 @@ const TextChat: React.FC = () => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Ask about your feed content, request explanations, or get study help..."
-            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
             className="flex-1"
             disabled={isLoading}
           />
-          <Button onClick={sendMessage} disabled={isLoading || !inputMessage.trim()}>
+          <Button onClick={handleSendMessage} disabled={isLoading || !inputMessage.trim()}>
             <Send className="w-4 h-4" />
           </Button>
         </div>
@@ -645,7 +652,7 @@ export const BrainMate: React.FC = () => {
 
   // Check for API key in environment variables on mount
   useEffect(() => {
-    const envApiKey = import.meta.env.VITE_TAVUS_API_KEY
+    const envApiKey = import.meta.env.VITE_TAVUS_API_KEY || '2b65ef86349841bbbee6451902796a78'
     if (envApiKey) {
       setApiKey(envApiKey)
     }
@@ -731,7 +738,7 @@ export const BrainMate: React.FC = () => {
             </div>
             BrainMate
           </h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your context-aware learning companion</p>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your context-aware learning companion powered by DeepSeek V3</p>
         </div>
         <div className="flex gap-2">
           <Button
