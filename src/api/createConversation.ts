@@ -10,13 +10,12 @@ export const createConversation = async (
       "x-api-key": token,
     },
     body: JSON.stringify({
-      // Stock Demo Persona
-      persona_id: "p4483df9ffff",
-      properties: {
-        // Apply greenscreen to the background
-        apply_greenscreen: false,
-      },
-    }),
+  persona_id: "p4483df9ffff",
+  replica_id: "r9244a899ae0", // Add this line
+  properties: {
+    apply_greenscreen: false,
+  },
+}),
   });
 
   if (!response?.ok) {
