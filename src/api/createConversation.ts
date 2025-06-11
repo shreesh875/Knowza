@@ -11,10 +11,10 @@ export const createConversation = async (
     },
     body: JSON.stringify({
       // Stock Demo Persona
-      persona_id: "p9a95912",
+      persona_id: "p4483df9ffff",
       properties: {
         // Apply greenscreen to the background
-        apply_greenscreen: true,
+        apply_greenscreen: false,
       },
     }),
   });
