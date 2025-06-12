@@ -848,49 +848,6 @@ export const BrainMate: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Learning Features Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
-          <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-              <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Feed Context</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Discusses your recent content</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
-          <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-              <Target className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Personalized Quizzes</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Based on your interests</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
-          <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-              <Brain className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Concept Explanations</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Simplified learning</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:shadow-md transition-shadow cursor-pointer group">
-          <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <h3 className="font-medium text-neutral-900 dark:text-white mb-1">Progress Tracking</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">Monitor your growth</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }
