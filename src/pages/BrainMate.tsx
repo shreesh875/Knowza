@@ -449,84 +449,90 @@ const recentFeedTopics = [
   'Data Science Fundamentals'
 ]
 
-// Component to format AI response text with proper structure
+// Component to format AI response text naturally without markdown
 const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
-  // Function to format text with proper line breaks and structure
   const formatText = (text: string) => {
-    // Split by double asterisks for bold sections
-    const parts = text.split(/\*\*(.*?)\*\*/g)
+    // Clean up the text by removing markdown-style formatting
+    let cleanText = text
+      // Remove markdown headers
+      .replace(/#{1,6}\s*/g, '')
+      // Remove horizontal rules
+      .replace(/---+/g, '')
+      // Remove excessive asterisks but keep emphasis
+      .replace(/\*{3,}/g, '')
+      // Clean up bold formatting - keep the emphasis but make it natural
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      // Remove bullet point asterisks at start of lines
+      .replace(/^\*\s+/gm, '')
+      // Clean up numbered lists to be more natural
+      .replace(/^\d+\.\s+/gm, '')
+
+    // Split into paragraphs and sentences for natural formatting
+    const paragraphs = cleanText.split(/\n\s*\n/).filter(p => p.trim())
     
-    return parts.map((part, index) => {
-      // Every odd index is bold text
-      if (index % 2 === 1) {
-        return <strong key={index} className="font-semibold text-primary-700 dark:text-primary-300">{part}</strong>
-      }
+    return paragraphs.map((paragraph, pIndex) => {
+      const trimmed = paragraph.trim()
+      if (!trimmed) return null
+
+      // Split paragraph into sentences for better readability
+      const sentences = trimmed.split(/(?<=[.!?])\s+/).filter(s => s.trim())
       
-      // Process regular text for other formatting
-      const lines = part.split('\n').filter(line => line.trim())
-      
-      return lines.map((line, lineIndex) => {
-        const trimmedLine = line.trim()
-        
-        // Skip empty lines
-        if (!trimmedLine) return null
-        
-        // Handle numbered lists
-        if (/^\d+\./.test(trimmedLine)) {
-          return (
-            <div key={`${index}-${lineIndex}`} className="mb-2">
-              <div className="flex items-start gap-2">
-                <span className="text-primary-600 dark:text-primary-400 font-medium text-sm mt-0.5">
-                  {trimmedLine.match(/^\d+\./)?.[0]}
-                </span>
-                <span className="flex-1">{trimmedLine.replace(/^\d+\.\s*/, '')}</span>
-              </div>
-            </div>
-          )
-        }
-        
-        // Handle bullet points with asterisks
-        if (trimmedLine.startsWith('*') && !trimmedLine.startsWith('**')) {
-          return (
-            <div key={`${index}-${lineIndex}`} className="mb-2">
-              <div className="flex items-start gap-2">
-                <span className="text-primary-600 dark:text-primary-400 text-sm mt-1">•</span>
-                <span className="flex-1">{trimmedLine.replace(/^\*\s*/, '')}</span>
-              </div>
-            </div>
-          )
-        }
-        
-        // Handle questions
-        if (trimmedLine.endsWith('?')) {
-          return (
-            <div key={`${index}-${lineIndex}`} className="mb-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border-l-4 border-primary-300 dark:border-primary-600">
-              <p className="text-primary-800 dark:text-primary-200 font-medium">{trimmedLine}</p>
-            </div>
-          )
-        }
-        
-        // Handle topic headers (lines that end with colon)
-        if (trimmedLine.endsWith(':')) {
-          return (
-            <h4 key={`${index}-${lineIndex}`} className="font-semibold text-neutral-900 dark:text-white mt-4 mb-2 text-lg">
-              {trimmedLine}
-            </h4>
-          )
-        }
-        
-        // Regular paragraphs
+      // Check if this looks like a topic header (short line ending with colon)
+      if (trimmed.endsWith(':') && trimmed.length < 80) {
         return (
-          <p key={`${index}-${lineIndex}`} className="mb-3 leading-relaxed">
-            {trimmedLine}
-          </p>
+          <div key={pIndex} className="mb-4">
+            <h4 className="font-semibold text-primary-700 dark:text-primary-300 text-lg mb-2">
+              {trimmed}
+            </h4>
+          </div>
         )
-      })
+      }
+
+      // Check if this looks like a question
+      if (trimmed.endsWith('?')) {
+        return (
+          <div key={pIndex} className="mb-4">
+            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4 border-l-4 border-primary-300 dark:border-primary-600">
+              <p className="text-primary-800 dark:text-primary-200 font-medium leading-relaxed">
+                {trimmed}
+              </p>
+            </div>
+          </div>
+        )
+      }
+
+      // Check if this looks like a list item (starts with number or has list-like structure)
+      if (/^\d+[\.\)]\s/.test(trimmed) || trimmed.includes(': ')) {
+        return (
+          <div key={pIndex} className="mb-3">
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                {trimmed.replace(/^\d+[\.\)]\s*/, '')}
+              </p>
+            </div>
+          </div>
+        )
+      }
+
+      // Regular paragraph with natural sentence breaks
+      return (
+        <div key={pIndex} className="mb-4">
+          <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+            {sentences.map((sentence, sIndex) => (
+              <span key={sIndex}>
+                {sentence.trim()}
+                {sIndex < sentences.length - 1 && ' '}
+              </span>
+            ))}
+          </p>
+        </div>
+      )
     })
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {formatText(content)}
     </div>
   )
@@ -540,7 +546,9 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
-      content: `Hi! I'm BrainMate, your AI learning companion. I can help you understand concepts, answer questions, and create quizzes based on your feed content. What would you like to explore?`, 
+      content: `Hi there! I'm BrainMate, your AI learning companion. I'm here to help you understand concepts, answer questions, and create quizzes based on your feed content.
+
+What would you like to explore today? I can explain complex topics in simple terms, help with homework, or even create a quick quiz to test your knowledge!`, 
       role: 'assistant',
       timestamp: new Date()
     }
@@ -668,29 +676,29 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
+      <div className="flex-1 overflow-y-auto space-y-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-2xl">
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
               {message.role === 'assistant' && (
                 <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
               )}
               <div
-                className={`px-4 py-3 rounded-lg ${
+                className={`px-5 py-4 rounded-2xl ${
                   message.role === 'user'
                     ? 'bg-primary-600 text-white'
-                    : 'bg-white text-neutral-900 dark:bg-neutral-700 dark:text-white shadow-sm'
+                    : 'bg-white text-neutral-900 dark:bg-neutral-700 dark:text-white shadow-sm border border-neutral-200 dark:border-neutral-600'
                 }`}
               >
                 {message.role === 'assistant' ? (
                   <FormattedMessage content={message.content} />
                 ) : (
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 )}
               </div>
             </div>
@@ -700,13 +708,13 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
         {/* Streaming response */}
         {streamingResponse && (
           <div className="flex justify-start">
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-2xl">
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="px-4 py-3 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white">
+              <div className="px-5 py-4 rounded-2xl bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-600">
                 <FormattedMessage content={streamingResponse} />
-                <span className="inline-block w-2 h-4 bg-primary-500 ml-1 animate-pulse rounded"></span>
+                <span className="inline-block w-2 h-5 bg-primary-500 ml-1 animate-pulse rounded"></span>
               </div>
             </div>
           </div>
@@ -718,7 +726,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="px-4 py-3 rounded-lg bg-white dark:bg-neutral-700 shadow-sm">
+              <div className="px-5 py-4 rounded-2xl bg-white dark:bg-neutral-700 shadow-sm">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -735,28 +743,28 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg mb-4">
         <button
           onClick={() => handleQuickAction('explain')}
-          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
         >
           <Lightbulb className="w-4 h-4 text-yellow-500" />
           <span>Explain</span>
         </button>
         <button
           onClick={() => handleQuickAction('quiz')}
-          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
         >
           <Target className="w-4 h-4 text-green-500" />
           <span>Quiz Me</span>
         </button>
         <button
           onClick={() => handleQuickAction('homework')}
-          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
         >
           <HelpCircle className="w-4 h-4 text-blue-500" />
           <span>Help</span>
         </button>
         <button
           onClick={() => handleQuickAction('tips')}
-          className="flex items-center gap-2 p-2 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors"
+          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
         >
           <TrendingUp className="w-4 h-4 text-purple-500" />
           <span>Tips</span>
@@ -775,19 +783,19 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
               placeholder="Ask about your feed content, request explanations, or get study help..."
               disabled={isLoading}
               rows={1}
-              className="w-full resize-none rounded-lg border border-neutral-300 px-4 py-3 text-neutral-900 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-400 disabled:opacity-50 transition-all"
+              className="w-full resize-none rounded-xl border border-neutral-300 px-4 py-3 text-neutral-900 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-400 disabled:opacity-50 transition-all"
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
           </div>
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !inputMessage.trim()}
-            className="h-12 w-12 rounded-lg flex-shrink-0 p-0 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 active:from-primary-800 active:to-primary-900 disabled:from-neutral-400 disabled:to-neutral-500 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none disabled:shadow-none"
+            className="h-12 w-12 rounded-xl flex-shrink-0 p-0 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 active:from-primary-800 active:to-primary-900 disabled:from-neutral-400 disabled:to-neutral-500 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none disabled:shadow-none"
           >
             <Send className="w-5 h-5" />
           </button>
         </div>
-        <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400 text-center">
+        <div className="mt-3 text-xs text-neutral-500 dark:text-neutral-400 text-center">
           Powered by DeepSeek V3 via OpenRouter • Free AI model
         </div>
       </div>
