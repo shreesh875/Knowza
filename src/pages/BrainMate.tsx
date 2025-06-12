@@ -182,6 +182,99 @@ const VideoComponent: React.FC<{ id: string }> = ({ id }) => {
   )
 }
 
+interface DraggableVideoPreviewProps {
+  localParticipantId: string | null
+  isCameraEnabled: boolean
+}
+
+const DraggableVideoPreview: React.FC<DraggableVideoPreviewProps> = ({ localParticipantId, isCameraEnabled }) => {
+  const [position, setPosition] = useState({ x: 20, y: 20 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const videoRef = useRef<HTMLDivElement>(null)
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!videoRef.current) return
+    
+    const rect = videoRef.current.getBoundingClientRect()
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    })
+    setIsDragging(true)
+  }
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !videoRef.current) return
+    
+    const container = videoRef.current.parentElement
+    if (!container) return
+    
+    const containerRect = container.getBoundingClientRect()
+    const videoRect = videoRef.current.getBoundingClientRect()
+    
+    const newX = e.clientX - containerRect.left - dragOffset.x
+    const newY = e.clientY - containerRect.top - dragOffset.y
+    
+    // Constrain to container bounds
+    const maxX = containerRect.width - videoRect.width
+    const maxY = containerRect.height - videoRect.height
+    
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY))
+    })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isDragging, dragOffset])
+
+  if (!localParticipantId) return null
+
+  return (
+    <div
+      ref={videoRef}
+      className={`absolute w-48 h-36 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10 ${
+        isDragging ? 'cursor-grabbing' : 'cursor-grab'
+      } transition-shadow hover:shadow-xl`}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+      }}
+      onMouseDown={handleMouseDown}
+    >
+      <DailyVideo
+        sessionId={localParticipantId}
+        type="video"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+      {!isCameraEnabled && (
+        <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
+          <CameraOff className="w-8 h-8 text-neutral-400" />
+        </div>
+      )}
+      
+      {/* Drag indicator */}
+      <div className="absolute top-2 left-2 w-2 h-2 bg-white/50 rounded-full"></div>
+      <div className="absolute top-2 left-5 w-2 h-2 bg-white/50 rounded-full"></div>
+      <div className="absolute top-2 left-8 w-2 h-2 bg-white/50 rounded-full"></div>
+    </div>
+  )
+}
+
 interface MediaPermissionsProps {
   onPermissionsGranted: () => void
   onPermissionsDenied: (error: string) => void
@@ -291,38 +384,28 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
 
   return (
     <div className="space-y-6">
-      {remoteParticipantIds.length > 0 ? (
-        <VideoComponent id={remoteParticipantIds[0]} />
-      ) : (
-        <div className="w-full h-[600px] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl flex items-center justify-center border border-primary-200 dark:border-primary-800">
-          <div className="text-center">
-            <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
-              <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-neutral-600 dark:text-neutral-400 text-xl font-medium">Connecting to BrainMate...</p>
-            <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">Preparing your personalized learning session</p>
-          </div>
-        </div>
-      )}
-
-      {/* Local video preview */}
-      {localParticipantId && (
-        <div className="relative">
-          <div className="absolute top-4 right-4 w-48 h-36 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10">
-            <DailyVideo
-              sessionId={localParticipantId}
-              type="video"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-            {!isCameraEnabled && (
-              <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
-                <CameraOff className="w-8 h-8 text-neutral-400" />
+      <div className="relative">
+        {remoteParticipantIds.length > 0 ? (
+          <VideoComponent id={remoteParticipantIds[0]} />
+        ) : (
+          <div className="w-full h-[600px] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl flex items-center justify-center border border-primary-200 dark:border-primary-800">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
+                <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
               </div>
-            )}
+              <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-neutral-600 dark:text-neutral-400 text-xl font-medium">Connecting to BrainMate...</p>
+              <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">Preparing your personalized learning session</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Draggable local video preview */}
+        <DraggableVideoPreview 
+          localParticipantId={localParticipantId}
+          isCameraEnabled={isCameraEnabled}
+        />
+      </div>
 
       <div className="flex items-center justify-center gap-4">
         <Button
