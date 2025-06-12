@@ -44,6 +44,24 @@ async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3)
   throw new Error('Max retries exceeded')
 }
 
+// Format authors to show only top 3 contributors
+function formatAuthors(authors: Array<{ name: string }>): string {
+  if (!authors || authors.length === 0) {
+    return 'Unknown'
+  }
+  
+  // Take only the first 3 authors
+  const topAuthors = authors.slice(0, 3)
+  const authorNames = topAuthors.map(a => a.name)
+  
+  if (authors.length <= 3) {
+    return authorNames.join(', ')
+  } else {
+    // Show first 3 authors and indicate there are more
+    return `${authorNames.join(', ')} et al.`
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -90,7 +108,7 @@ Deno.serve(async (req: Request) => {
       content_type: 'paper',
       content_url: paper.url || `https://www.semanticscholar.org/paper/${paper.paperId}`,
       thumbnail_url: generatePaperThumbnail(paper.paperId),
-      author: paper.authors?.map(a => a.name).join(', ') || 'Unknown',
+      author: formatAuthors(paper.authors), // Use the new formatting function
       published_at: paper.year ? `${paper.year}-01-01` : new Date().toISOString(),
       tags: paper.fieldsOfStudy || [],
       likes_count: Math.floor(paper.citationCount / 10) || 0,
