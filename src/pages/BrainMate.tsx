@@ -691,11 +691,6 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
               className="w-full resize-none rounded-lg border border-neutral-300 px-4 py-3 text-neutral-900 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-400 disabled:opacity-50 transition-all"
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
-            {inputMessage.length > 0 && (
-              <div className="absolute bottom-2 right-2 text-xs text-neutral-400 dark:text-neutral-500">
-                <span>Press Enter to send, Shift+Enter for new line</span>
-              </div>
-            )}
           </div>
           <button
             onClick={handleSendMessage}
