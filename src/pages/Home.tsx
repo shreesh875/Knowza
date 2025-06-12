@@ -15,6 +15,8 @@ export const Home: React.FC = () => {
     refresh,
     searchPapers,
     filterByField,
+    switchDataSource,
+    currentDataSource,
   } = useFeedData()
 
   const handleLike = (postId: string) => {
@@ -39,7 +41,7 @@ export const Home: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Research Feed</h1>
           <p className="text-neutral-600 dark:text-neutral-400 mt-1">
-            Discover the latest research papers from Semantic Scholar
+            Discover the latest research papers from {currentDataSource === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
           </p>
         </div>
         <Button
@@ -57,6 +59,8 @@ export const Home: React.FC = () => {
       <FeedFilters
         onSearch={searchPapers}
         onFilterByField={filterByField}
+        onSwitchDataSource={switchDataSource}
+        currentDataSource={currentDataSource}
         loading={loading}
       />
 
@@ -85,7 +89,7 @@ export const Home: React.FC = () => {
           <div className="text-center">
             <Loader className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
             <p className="text-neutral-600 dark:text-neutral-400">
-              Loading research papers...
+              Loading research papers from {currentDataSource === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}...
             </p>
           </div>
         </div>

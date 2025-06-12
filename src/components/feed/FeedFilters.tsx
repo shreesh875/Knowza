@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
-import { Search, Filter, Sparkles, Brain, Atom, Dna, FlaskConical, Calculator, Code, Microscope, BarChart3, Bot, Zap } from 'lucide-react'
+import { Search, Filter, Sparkles, Brain, Atom, Dna, FlaskConical, Calculator, Code, Microscope, BarChart3, Bot, Zap, Database, BookOpen } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 
 interface FeedFiltersProps {
   onSearch: (query: string) => void
   onFilterByField: (field: string) => void
+  onSwitchDataSource: (source: 'semantic-scholar' | 'openalex') => void
+  currentDataSource: 'semantic-scholar' | 'openalex'
   loading: boolean
 }
 
@@ -25,6 +27,8 @@ const researchFields = [
 export const FeedFilters: React.FC<FeedFiltersProps> = ({
   onSearch,
   onFilterByField,
+  onSwitchDataSource,
+  currentDataSource,
   loading,
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -46,8 +50,51 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
     }
   }
 
+  const handleDataSourceSwitch = (source: 'semantic-scholar' | 'openalex') => {
+    onSwitchDataSource(source)
+  }
+
   return (
     <div className="space-y-4">
+      {/* Data Source Selector */}
+      <div className="flex items-center gap-4">
+        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          Data Source:
+        </span>
+        <div className="flex bg-neutral-100 dark:bg-neutral-800 rounded-lg p-1">
+          <button
+            onClick={() => handleDataSourceSwitch('openalex')}
+            disabled={loading}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              currentDataSource === 'openalex'
+                ? 'bg-white text-primary-700 shadow-sm dark:bg-neutral-700 dark:text-primary-400'
+                : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            <Database className="w-4 h-4" />
+            OpenAlex
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full dark:bg-green-900/20 dark:text-green-400">
+              200M+ papers
+            </span>
+          </button>
+          <button
+            onClick={() => handleDataSourceSwitch('semantic-scholar')}
+            disabled={loading}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              currentDataSource === 'semantic-scholar'
+                ? 'bg-white text-primary-700 shadow-sm dark:bg-neutral-700 dark:text-primary-400'
+                : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            <BookOpen className="w-4 h-4" />
+            Semantic Scholar
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full dark:bg-blue-900/20 dark:text-blue-400">
+              200M+ papers
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* Search Bar */}
       <form onSubmit={handleSearch} className="flex gap-2">
         <div className="flex-1">
@@ -55,7 +102,7 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search research papers..."
+            placeholder={`Search research papers on ${currentDataSource === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}...`}
             icon={<Search className="w-4 h-4" />}
             disabled={loading}
           />
@@ -93,6 +140,26 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
             {field.label}
           </button>
         ))}
+      </div>
+
+      {/* Data Source Info */}
+      <div className="text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg p-3">
+        <div className="flex items-center gap-2 mb-1">
+          {currentDataSource === 'openalex' ? (
+            <Database className="w-4 h-4 text-green-600" />
+          ) : (
+            <BookOpen className="w-4 h-4 text-blue-600" />
+          )}
+          <span className="font-medium">
+            {currentDataSource === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
+          </span>
+        </div>
+        <p>
+          {currentDataSource === 'openalex' 
+            ? 'Open catalog of scholarly papers, authors, venues, institutions, and concepts. Completely free and open.'
+            : 'AI-powered research tool for scientific literature. Provides semantic analysis and paper recommendations.'
+          }
+        </p>
       </div>
     </div>
   )

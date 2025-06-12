@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Card, CardContent } from '../components/ui/Card'
 import type { FeedPost } from '../services/semanticScholarService'
 import SemanticScholarService from '../services/semanticScholarService'
+import OpenAlexService from '../services/openAlexService'
 
 export const PostDetail: React.FC = () => {
   const { postId } = useParams<{ postId: string }>()
@@ -16,6 +17,7 @@ export const PostDetail: React.FC = () => {
   const [isSaved, setIsSaved] = useState(false)
 
   const semanticScholarService = new SemanticScholarService()
+  const openAlexService = new OpenAlexService()
 
   useEffect(() => {
     const loadPost = async () => {
@@ -29,13 +31,25 @@ export const PostDetail: React.FC = () => {
         setLoading(true)
         setError(null)
         
-        // Get paper details directly from Semantic Scholar API using the paper ID
-        const paperDetails = await semanticScholarService.getPaperById(postId)
+        // Try OpenAlex first (since it's our primary source now)
+        let paperDetails: FeedPost | null = null
+        
+        try {
+          paperDetails = await openAlexService.getWorkById(postId)
+        } catch (openAlexError) {
+          console.log('OpenAlex failed, trying Semantic Scholar:', openAlexError)
+          // Fallback to Semantic Scholar
+          try {
+            paperDetails = await semanticScholarService.getPaperById(postId)
+          } catch (semanticScholarError) {
+            console.error('Both services failed:', { openAlexError, semanticScholarError })
+          }
+        }
         
         if (paperDetails) {
           setPost(paperDetails)
         } else {
-          setError('Paper not found')
+          setError('Paper not found in any database')
         }
       } catch (err) {
         console.error('Error loading post:', err)
@@ -326,7 +340,7 @@ export const PostDetail: React.FC = () => {
                 </p>
                 <Button onClick={handleReadPaper} size="lg" className="bg-primary-600 hover:bg-primary-700">
                   <ExternalLink className="w-5 h-5 mr-2" />
-                  Read Full Paper on Semantic Scholar
+                  Read Full Paper
                 </Button>
               </div>
             </div>
