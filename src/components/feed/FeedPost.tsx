@@ -1,24 +1,38 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, MessageCircle, Bookmark, Share, ExternalLink, FileText, Calendar, Users } from 'lucide-react'
+import { Heart, Bookmark, Share, ExternalLink, FileText, Calendar, Users } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
 import { Button } from '../ui/Button'
+import { CommentsSection } from './CommentsSection'
+import { usePostInteractions } from '../../hooks/usePostInteractions'
+import { useUser } from '../../contexts/UserContext'
 import type { FeedPost as FeedPostType } from '../../services/semanticScholarService'
 
 interface FeedPostProps {
   post: FeedPostType
-  onLike?: (postId: string) => void
   onSave?: (postId: string) => void
   onShare?: (postId: string) => void
 }
 
 export const FeedPost: React.FC<FeedPostProps> = ({
   post,
-  onLike,
   onSave,
   onShare,
 }) => {
   const navigate = useNavigate()
+  const { user } = useUser()
+  
+  const {
+    likesCount,
+    commentsCount,
+    isLiked,
+    comments,
+    loading: interactionsLoading,
+    error: interactionsError,
+    toggleLike,
+    addComment,
+    deleteComment,
+  } = usePostInteractions(post.id)
 
   const handlePostClick = () => {
     navigate(`/post/${post.id}`)
@@ -36,6 +50,16 @@ export const FeedPost: React.FC<FeedPostProps> = ({
     action()
   }
 
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!user) {
+      // Redirect to sign in or show sign in modal
+      console.log('User must be signed in to like posts')
+      return
+    }
+    toggleLike()
+  }
+
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString)
@@ -51,12 +75,12 @@ export const FeedPost: React.FC<FeedPostProps> = ({
   }
 
   return (
-    <div 
-      className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary-300 dark:hover:border-primary-700"
-      onClick={handlePostClick}
-    >
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md transition-all duration-200">
       {/* Post Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-neutral-200 dark:border-neutral-700">
+      <div 
+        className="flex items-center gap-3 p-4 border-b border-neutral-200 dark:border-neutral-700 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors"
+        onClick={handlePostClick}
+      >
         <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center">
           <FileText className="w-5 h-5 text-primary-600 dark:text-primary-400" />
         </div>
@@ -77,55 +101,58 @@ export const FeedPost: React.FC<FeedPostProps> = ({
 
       {/* Post Content */}
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3 leading-tight hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-          {post.title}
-        </h2>
-        
-        {post.description && (
-          <p className="text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
-            {truncateDescription(post.description)}
-          </p>
-        )}
+        <div 
+          className="cursor-pointer"
+          onClick={handlePostClick}
+        >
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3 leading-tight hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+            {post.title}
+          </h2>
+          
+          {post.description && (
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
+              {truncateDescription(post.description)}
+            </p>
+          )}
 
-        {/* Thumbnail */}
-        {post.thumbnail_url && (
-          <div className="relative mb-4 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-            <img
-              src={post.thumbnail_url}
-              alt={post.title}
-              className="w-full h-48 object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-            <div className="absolute bottom-3 right-3">
-              <Button
-                onClick={handleReadPaper}
-                size="sm"
-                className="bg-white/90 text-neutral-900 hover:bg-white backdrop-blur-sm"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Read Paper
-              </Button>
+          {/* Thumbnail */}
+          {post.thumbnail_url && (
+            <div className="relative mb-4 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+              <img
+                src={post.thumbnail_url}
+                alt={post.title}
+                className="w-full h-48 object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              <div className="absolute bottom-3 right-3">
+                <Button
+                  onClick={handleReadPaper}
+                  size="sm"
+                  className="bg-white/90 text-neutral-900 hover:bg-white backdrop-blur-sm"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Read Paper
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <button 
-              onClick={(e) => handleActionClick(e, () => onLike?.(post.id))}
-              className="flex items-center gap-2 text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400 transition-colors"
+              onClick={handleLikeClick}
+              disabled={interactionsLoading}
+              className={`flex items-center gap-2 transition-colors ${
+                isLiked 
+                  ? 'text-red-500' 
+                  : 'text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400'
+              } disabled:opacity-50`}
             >
-              <Heart className="w-5 h-5" />
-              <span className="text-sm font-medium">{post.likes_count}</span>
-            </button>
-            <button 
-              onClick={(e) => handleActionClick(e, () => {})}
-              className="flex items-center gap-2 text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">{post.comments_count}</span>
+              <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+              <span className="text-sm font-medium">{likesCount}</span>
             </button>
           </div>
           <div className="flex items-center gap-2">
@@ -144,9 +171,19 @@ export const FeedPost: React.FC<FeedPostProps> = ({
           </div>
         </div>
 
+        {/* Comments Section */}
+        <CommentsSection
+          comments={comments}
+          commentsCount={commentsCount}
+          onAddComment={addComment}
+          onDeleteComment={deleteComment}
+          loading={interactionsLoading}
+          error={interactionsError}
+        />
+
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
             {post.tags.slice(0, 5).map((tag) => (
               <span
                 key={tag}

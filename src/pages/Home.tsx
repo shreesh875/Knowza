@@ -19,11 +19,6 @@ export const Home: React.FC = () => {
     currentDataSource,
   } = useFeedData()
 
-  const handleLike = (postId: string) => {
-    console.log('Like post:', postId)
-    // TODO: Implement like functionality
-  }
-
   const handleSave = (postId: string) => {
     console.log('Save post:', postId)
     // TODO: Implement save functionality
@@ -32,6 +27,16 @@ export const Home: React.FC = () => {
   const handleShare = (postId: string) => {
     console.log('Share post:', postId)
     // TODO: Implement share functionality
+    if (navigator.share) {
+      navigator.share({
+        title: 'Research Paper',
+        text: 'Check out this research paper',
+        url: `${window.location.origin}/post/${postId}`,
+      })
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`)
+    }
   }
 
   return (
@@ -102,7 +107,6 @@ export const Home: React.FC = () => {
             <FeedPost
               key={post.id}
               post={post}
-              onLike={handleLike}
               onSave={handleSave}
               onShare={handleShare}
             />

@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ExternalLink, Heart, Bookmark, Share, Calendar, Users, FileText, Eye, Download, Quote } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Card, CardContent } from '../components/ui/Card'
+import { CommentsSection } from '../components/feed/CommentsSection'
+import { usePostInteractions } from '../hooks/usePostInteractions'
+import { useUser } from '../contexts/UserContext'
 import type { FeedPost } from '../services/semanticScholarService'
 import SemanticScholarService from '../services/semanticScholarService'
 import OpenAlexService from '../services/openAlexService'
@@ -10,11 +13,23 @@ import OpenAlexService from '../services/openAlexService'
 export const PostDetail: React.FC = () => {
   const { postId } = useParams<{ postId: string }>()
   const navigate = useNavigate()
+  const { user } = useUser()
   const [post, setPost] = useState<FeedPost | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isLiked, setIsLiked] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
+
+  const {
+    likesCount,
+    commentsCount,
+    isLiked,
+    comments,
+    loading: interactionsLoading,
+    error: interactionsError,
+    toggleLike,
+    addComment,
+    deleteComment,
+  } = usePostInteractions(postId || '')
 
   const semanticScholarService = new SemanticScholarService()
   const openAlexService = new OpenAlexService()
@@ -73,8 +88,11 @@ export const PostDetail: React.FC = () => {
   }
 
   const handleLike = () => {
-    setIsLiked(!isLiked)
-    // TODO: Implement actual like functionality
+    if (!user) {
+      console.log('User must be signed in to like posts')
+      return
+    }
+    toggleLike()
   }
 
   const handleSave = () => {
@@ -165,10 +183,11 @@ export const PostDetail: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={handleLike}
+            disabled={interactionsLoading || !user}
             className={isLiked ? 'text-red-600 border-red-300' : ''}
           >
             <Heart className={`w-4 h-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-            {post.likes_count + (isLiked ? 1 : 0)}
+            {likesCount}
           </Button>
           <Button
             variant="outline"
@@ -206,11 +225,11 @@ export const PostDetail: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4" />
-                  <span>{post.likes_count * 10} views</span>
+                  <span>{likesCount * 10} views</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Quote className="w-4 h-4" />
-                  <span>{post.likes_count} citations</span>
+                  <span>{likesCount} citations</span>
                 </div>
               </div>
             </div>
@@ -299,7 +318,7 @@ export const PostDetail: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600 dark:text-neutral-400">Citations:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{post.likes_count}</span>
+                    <span className="text-neutral-900 dark:text-white font-medium">{likesCount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600 dark:text-neutral-400">Type:</span>
@@ -315,15 +334,15 @@ export const PostDetail: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-neutral-600 dark:text-neutral-400">Likes:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{post.likes_count}</span>
+                    <span className="text-neutral-900 dark:text-white font-medium">{likesCount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600 dark:text-neutral-400">Comments:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{post.comments_count}</span>
+                    <span className="text-neutral-900 dark:text-white font-medium">{commentsCount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600 dark:text-neutral-400">Views:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{post.likes_count * 10}</span>
+                    <span className="text-neutral-900 dark:text-white font-medium">{likesCount * 10}</span>
                   </div>
                 </div>
               </div>
@@ -345,6 +364,23 @@ export const PostDetail: React.FC = () => {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Comments Section */}
+      <Card>
+        <CardContent className="p-8">
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-6">
+            Discussion
+          </h2>
+          <CommentsSection
+            comments={comments}
+            commentsCount={commentsCount}
+            onAddComment={addComment}
+            onDeleteComment={deleteComment}
+            loading={interactionsLoading}
+            error={interactionsError}
+          />
         </CardContent>
       </Card>
     </div>
