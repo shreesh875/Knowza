@@ -10,12 +10,13 @@ export const Home: React.FC = () => {
     posts,
     loading,
     error,
-    filter,
-    setFilter,
-    searchQuery,
-    setSearchQuery,
-    refreshFeed,
-    filteredPosts
+    refresh,
+    searchPapers,
+    filterByField,
+    switchDataSource,
+    currentDataSource,
+    hasMore,
+    loadMore
   } = useFeedData()
 
   return (
@@ -32,7 +33,7 @@ export const Home: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={refreshFeed}
+            onClick={refresh}
             disabled={loading}
             className="flex items-center gap-2"
           >
@@ -42,23 +43,14 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-          <input
-            type="text"
-            placeholder="Search papers, topics, or authors..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
-          />
-        </div>
-
-        {/* Content Type Filter */}
-        <FeedFilters filter={filter} onFilterChange={setFilter} />
-      </div>
+      {/* Filters */}
+      <FeedFilters 
+        onSearch={searchPapers}
+        onFilterByField={filterByField}
+        onSwitchDataSource={switchDataSource}
+        currentDataSource={currentDataSource}
+        loading={loading}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -114,7 +106,7 @@ export const Home: React.FC = () => {
 
       {/* Posts Feed */}
       <div className="space-y-6">
-        {filteredPosts.length === 0 && !loading ? (
+        {posts.length === 0 && !loading ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-neutral-400" />
@@ -123,36 +115,28 @@ export const Home: React.FC = () => {
               No posts found
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-              {searchQuery 
-                ? `No posts match "${searchQuery}". Try a different search term.`
-                : 'No posts match the selected filter. Try changing your filter settings.'
-              }
+              No posts match the current filters. Try adjusting your search or filter settings.
             </p>
-            {(searchQuery || filter !== 'all') && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchQuery('')
-                  setFilter('all')
-                }}
-              >
-                Clear Filters
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              onClick={refresh}
+            >
+              Refresh Feed
+            </Button>
           </div>
         ) : (
-          filteredPosts.map((post) => (
+          posts.map((post) => (
             <FeedPost key={post.id} post={post} />
           ))
         )}
       </div>
 
       {/* Load More Button */}
-      {!loading && filteredPosts.length > 0 && filteredPosts.length >= 10 && (
+      {!loading && posts.length > 0 && hasMore && (
         <div className="text-center py-6">
           <Button
             variant="outline"
-            onClick={refreshFeed}
+            onClick={loadMore}
             className="px-8"
           >
             Load More Papers
