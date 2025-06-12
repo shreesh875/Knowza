@@ -697,14 +697,13 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
               </div>
             )}
           </div>
-          <Button 
-            onClick={handleSendMessage} 
+          <button
+            onClick={handleSendMessage}
             disabled={isLoading || !inputMessage.trim()}
-            size="lg"
-            className="h-12 w-12 rounded-lg flex-shrink-0 p-0"
+            className="h-12 w-12 rounded-lg flex-shrink-0 p-0 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center"
           >
             <Send className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
         <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400 text-center">
           Powered by DeepSeek V3 via OpenRouter • Free AI model
