@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Heart, MessageCircle, Bookmark, Share, ExternalLink, FileText, Calendar, Users } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
 import { Button } from '../ui/Button'
@@ -17,10 +18,22 @@ export const FeedPost: React.FC<FeedPostProps> = ({
   onSave,
   onShare,
 }) => {
-  const handleReadPaper = () => {
+  const navigate = useNavigate()
+
+  const handlePostClick = () => {
+    navigate(`/post/${post.id}`)
+  }
+
+  const handleReadPaper = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent navigation to post detail
     if (post.content_url) {
       window.open(post.content_url, '_blank', 'noopener,noreferrer')
     }
+  }
+
+  const handleActionClick = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation() // Prevent navigation to post detail
+    action()
   }
 
   const formatDate = (dateString: string) => {
@@ -38,7 +51,10 @@ export const FeedPost: React.FC<FeedPostProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div 
+      className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary-300 dark:hover:border-primary-700"
+      onClick={handlePostClick}
+    >
       {/* Post Header */}
       <div className="flex items-center gap-3 p-4 border-b border-neutral-200 dark:border-neutral-700">
         <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center">
@@ -61,7 +77,7 @@ export const FeedPost: React.FC<FeedPostProps> = ({
 
       {/* Post Content */}
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3 leading-tight">
+        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3 leading-tight hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
           {post.title}
         </h2>
         
@@ -98,14 +114,14 @@ export const FeedPost: React.FC<FeedPostProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
-              onClick={() => onLike?.(post.id)}
+              onClick={(e) => handleActionClick(e, () => onLike?.(post.id))}
               className="flex items-center gap-2 text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400 transition-colors"
             >
               <Heart className="w-5 h-5" />
               <span className="text-sm font-medium">{post.likes_count}</span>
             </button>
             <button 
-              onClick={() => {/* Handle comments */}}
+              onClick={(e) => handleActionClick(e, () => {})}
               className="flex items-center gap-2 text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors"
             >
               <MessageCircle className="w-5 h-5" />
@@ -114,13 +130,13 @@ export const FeedPost: React.FC<FeedPostProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => onSave?.(post.id)}
+              onClick={(e) => handleActionClick(e, () => onSave?.(post.id))}
               className="p-2 text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors"
             >
               <Bookmark className="w-5 h-5" />
             </button>
             <button 
-              onClick={() => onShare?.(post.id)}
+              onClick={(e) => handleActionClick(e, () => onShare?.(post.id))}
               className="p-2 text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors"
             >
               <Share className="w-5 h-5" />
