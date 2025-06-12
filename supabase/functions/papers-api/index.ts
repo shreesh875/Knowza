@@ -1,6 +1,7 @@
 import { corsHeaders } from '../_shared/cors.ts'
 
 const SEMANTIC_SCHOLAR_API = 'https://api.semanticscholar.org/graph/v1'
+const API_KEY = 'Eig1SjMOPd1wbMqXoizgd5zdK9r4waAra66nCVuz'
 
 interface Paper {
   paperId: string
@@ -28,23 +29,32 @@ Deno.serve(async (req: Request) => {
     const limit = url.searchParams.get('limit') || '10'
     const offset = url.searchParams.get('offset') || '0'
 
+    console.log(`Fetching papers: query="${query}", limit=${limit}, offset=${offset}`)
+
     // Add delay to respect rate limits
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     const response = await fetch(
       `${SEMANTIC_SCHOLAR_API}/paper/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&fields=paperId,title,abstract,authors,year,citationCount,url,venue,fieldsOfStudy`,
       {
         headers: {
           'User-Agent': 'BrainFeed/1.0 (educational-platform)',
+          'x-api-key': API_KEY,
+          'Content-Type': 'application/json',
         },
       }
     )
 
+    console.log(`Semantic Scholar API response status: ${response.status}`)
+
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Semantic Scholar API error: ${response.status} - ${errorText}`)
       throw new Error(`Semantic Scholar API error: ${response.status}`)
     }
 
     const data = await response.json()
+    console.log(`Successfully fetched ${data.data?.length || 0} papers`)
     
     // Transform the data to match our expected format
     const papers = data.data?.map((paper: Paper) => ({
@@ -53,12 +63,13 @@ Deno.serve(async (req: Request) => {
       description: paper.abstract || 'No abstract available',
       content_type: 'paper',
       content_url: paper.url || `https://www.semanticscholar.org/paper/${paper.paperId}`,
-      thumbnail_url: null,
+      thumbnail_url: generatePaperThumbnail(paper.paperId),
       author: paper.authors?.map(a => a.name).join(', ') || 'Unknown',
-      published_at: paper.year ? `${paper.year}-01-01` : null,
+      published_at: paper.year ? `${paper.year}-01-01` : new Date().toISOString(),
       tags: paper.fieldsOfStudy || [],
       likes_count: Math.floor(paper.citationCount / 10) || 0,
       comments_count: Math.floor(Math.random() * 50),
+      created_at: new Date().toISOString(),
     })) || []
 
     return new Response(
@@ -88,3 +99,21 @@ Deno.serve(async (req: Request) => {
     )
   }
 })
+
+// Generate realistic thumbnail URLs for papers
+function generatePaperThumbnail(paperId: string): string {
+  const thumbnails = [
+    'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=800',
+    'https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=800'
+  ]
+  
+  // Use paper ID to consistently select the same thumbnail
+  const index = paperId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % thumbnails.length
+  return thumbnails[index]
+}
