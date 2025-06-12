@@ -449,6 +449,89 @@ const recentFeedTopics = [
   'Data Science Fundamentals'
 ]
 
+// Component to format AI response text with proper structure
+const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
+  // Function to format text with proper line breaks and structure
+  const formatText = (text: string) => {
+    // Split by double asterisks for bold sections
+    const parts = text.split(/\*\*(.*?)\*\*/g)
+    
+    return parts.map((part, index) => {
+      // Every odd index is bold text
+      if (index % 2 === 1) {
+        return <strong key={index} className="font-semibold text-primary-700 dark:text-primary-300">{part}</strong>
+      }
+      
+      // Process regular text for other formatting
+      const lines = part.split('\n').filter(line => line.trim())
+      
+      return lines.map((line, lineIndex) => {
+        const trimmedLine = line.trim()
+        
+        // Skip empty lines
+        if (!trimmedLine) return null
+        
+        // Handle numbered lists
+        if (/^\d+\./.test(trimmedLine)) {
+          return (
+            <div key={`${index}-${lineIndex}`} className="mb-2">
+              <div className="flex items-start gap-2">
+                <span className="text-primary-600 dark:text-primary-400 font-medium text-sm mt-0.5">
+                  {trimmedLine.match(/^\d+\./)?.[0]}
+                </span>
+                <span className="flex-1">{trimmedLine.replace(/^\d+\.\s*/, '')}</span>
+              </div>
+            </div>
+          )
+        }
+        
+        // Handle bullet points with asterisks
+        if (trimmedLine.startsWith('*') && !trimmedLine.startsWith('**')) {
+          return (
+            <div key={`${index}-${lineIndex}`} className="mb-2">
+              <div className="flex items-start gap-2">
+                <span className="text-primary-600 dark:text-primary-400 text-sm mt-1">•</span>
+                <span className="flex-1">{trimmedLine.replace(/^\*\s*/, '')}</span>
+              </div>
+            </div>
+          )
+        }
+        
+        // Handle questions
+        if (trimmedLine.endsWith('?')) {
+          return (
+            <div key={`${index}-${lineIndex}`} className="mb-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border-l-4 border-primary-300 dark:border-primary-600">
+              <p className="text-primary-800 dark:text-primary-200 font-medium">{trimmedLine}</p>
+            </div>
+          )
+        }
+        
+        // Handle topic headers (lines that end with colon)
+        if (trimmedLine.endsWith(':')) {
+          return (
+            <h4 key={`${index}-${lineIndex}`} className="font-semibold text-neutral-900 dark:text-white mt-4 mb-2 text-lg">
+              {trimmedLine}
+            </h4>
+          )
+        }
+        
+        // Regular paragraphs
+        return (
+          <p key={`${index}-${lineIndex}`} className="mb-3 leading-relaxed">
+            {trimmedLine}
+          </p>
+        )
+      })
+    })
+  }
+
+  return (
+    <div className="space-y-1">
+      {formatText(content)}
+    </div>
+  )
+}
+
 interface TextChatProps {
   openRouterApiKey: string | null
 }
@@ -591,7 +674,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
             key={message.id}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-2xl">
               {message.role === 'assistant' && (
                 <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -604,7 +687,11 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
                     : 'bg-white text-neutral-900 dark:bg-neutral-700 dark:text-white shadow-sm'
                 }`}
               >
-                {message.content}
+                {message.role === 'assistant' ? (
+                  <FormattedMessage content={message.content} />
+                ) : (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                )}
               </div>
             </div>
           </div>
@@ -613,13 +700,13 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
         {/* Streaming response */}
         {streamingResponse && (
           <div className="flex justify-start">
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
+            <div className="flex items-start gap-3 max-w-xs lg:max-w-2xl">
               <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </div>
               <div className="px-4 py-3 rounded-lg bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white">
-                {streamingResponse}
-                <span className="animate-pulse">|</span>
+                <FormattedMessage content={streamingResponse} />
+                <span className="inline-block w-2 h-4 bg-primary-500 ml-1 animate-pulse rounded"></span>
               </div>
             </div>
           </div>
