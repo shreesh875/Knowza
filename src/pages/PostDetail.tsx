@@ -311,6 +311,7 @@ export const PostDetail: React.FC = () => {
   const [likesCount, setLikesCount] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
+  const [justLiked, setJustLiked] = useState(false)
 
   useEffect(() => {
     // Find the post by ID
@@ -319,8 +320,29 @@ export const PostDetail: React.FC = () => {
       setPost(foundPost)
       setLikesCount(foundPost.likes)
       loadComments()
+      checkLikeStatus()
     }
   }, [postId])
+
+  const checkLikeStatus = async () => {
+    if (!user || !postId) return
+
+    try {
+      const { data, error } = await supabase
+        .from('post_likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (data && !error) {
+        setIsLiked(true)
+      }
+    } catch (error) {
+      // User hasn't liked this post yet
+      setIsLiked(false)
+    }
+  }
 
   const loadComments = async () => {
     if (!postId) return
@@ -373,6 +395,7 @@ export const PostDetail: React.FC = () => {
 
         setIsLiked(false)
         setLikesCount(prev => prev - 1)
+        setJustLiked(false)
       } else {
         // Like the post
         const { error } = await supabase
@@ -386,9 +409,14 @@ export const PostDetail: React.FC = () => {
 
         setIsLiked(true)
         setLikesCount(prev => prev + 1)
+        setJustLiked(true)
+        
+        // Remove the "just liked" animation after a short delay
+        setTimeout(() => setJustLiked(false), 600)
       }
     } catch (error) {
       console.error('Error toggling like:', error)
+      alert('Failed to update like. Please try again.')
     } finally {
       setIsLiking(false)
     }
@@ -502,14 +530,27 @@ export const PostDetail: React.FC = () => {
             <button 
               onClick={handleLike}
               disabled={isLiking || !user}
-              className={`flex items-center gap-2 transition-colors ${
+              className={`flex items-center gap-2 transition-all duration-200 ${
                 isLiked 
                   ? 'text-red-500' 
                   : 'text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400'
-              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''} ${
+                justLiked ? 'scale-110' : 'scale-100'
+              }`}
             >
-              <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
-              <span className="font-medium">{likesCount}</span>
+              <Heart 
+                className={`w-6 h-6 transition-all duration-200 ${
+                  isLiked ? 'fill-current' : ''
+                } ${justLiked ? 'animate-pulse' : ''}`} 
+              />
+              <span className={`font-medium transition-all duration-200 ${
+                justLiked ? 'text-red-500 font-bold' : ''
+              }`}>
+                {likesCount}
+                {justLiked && (
+                  <span className="ml-1 text-sm animate-bounce">+1</span>
+                )}
+              </span>
             </button>
             <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
               <MessageCircle className="w-6 h-6" />
@@ -522,6 +563,19 @@ export const PostDetail: React.FC = () => {
               <Share className="w-6 h-6" />
             </button>
           </div>
+
+          {/* Like Status Indicator */}
+          {isLiked && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+                <Heart className="w-4 h-4 fill-current" />
+                <span>You liked this post</span>
+                {justLiked && (
+                  <span className="text-xs animate-pulse">• Just now</span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Content */}
           <div className="prose prose-neutral dark:prose-invert max-w-none">

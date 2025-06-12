@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, MessageCircle, Bookmark, Share, Play, FileText, Video } from 'lucide-react'
 import { Card, CardContent } from '../ui/Card'
@@ -30,6 +30,32 @@ export const FeedPost: React.FC<FeedPostProps> = ({ post }) => {
   const [likesCount, setLikesCount] = useState(post.likes)
   const [isLiked, setIsLiked] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
+  const [justLiked, setJustLiked] = useState(false)
+
+  // Check if user has already liked this post
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      if (!user) return
+
+      try {
+        const { data, error } = await supabase
+          .from('post_likes')
+          .select('id')
+          .eq('post_id', post.id)
+          .eq('user_id', user.id)
+          .single()
+
+        if (data && !error) {
+          setIsLiked(true)
+        }
+      } catch (error) {
+        // User hasn't liked this post yet
+        setIsLiked(false)
+      }
+    }
+
+    checkLikeStatus()
+  }, [user, post.id])
 
   const getContentIcon = (type: string) => {
     switch (type) {
@@ -66,6 +92,7 @@ export const FeedPost: React.FC<FeedPostProps> = ({ post }) => {
 
         setIsLiked(false)
         setLikesCount(prev => prev - 1)
+        setJustLiked(false)
       } else {
         // Like the post
         const { error } = await supabase
@@ -79,9 +106,15 @@ export const FeedPost: React.FC<FeedPostProps> = ({ post }) => {
 
         setIsLiked(true)
         setLikesCount(prev => prev + 1)
+        setJustLiked(true)
+        
+        // Remove the "just liked" animation after a short delay
+        setTimeout(() => setJustLiked(false), 600)
       }
     } catch (error) {
       console.error('Error toggling like:', error)
+      // Show user-friendly error message
+      alert('Failed to update like. Please try again.')
     } finally {
       setIsLiking(false)
     }
@@ -168,14 +201,27 @@ export const FeedPost: React.FC<FeedPostProps> = ({ post }) => {
             <button 
               onClick={handleLike}
               disabled={isLiking || !user}
-              className={`flex items-center gap-2 transition-colors ${
+              className={`flex items-center gap-2 transition-all duration-200 ${
                 isLiked 
                   ? 'text-red-500' 
                   : 'text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400'
-              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''} ${
+                justLiked ? 'scale-110' : 'scale-100'
+              }`}
             >
-              <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-              <span className="text-sm font-medium">{likesCount}</span>
+              <Heart 
+                className={`w-5 h-5 transition-all duration-200 ${
+                  isLiked ? 'fill-current' : ''
+                } ${justLiked ? 'animate-pulse' : ''}`} 
+              />
+              <span className={`text-sm font-medium transition-all duration-200 ${
+                justLiked ? 'text-red-500 font-bold' : ''
+              }`}>
+                {likesCount}
+                {justLiked && (
+                  <span className="ml-1 text-xs animate-bounce">+1</span>
+                )}
+              </span>
             </button>
             <button 
               onClick={handleComment}
@@ -200,6 +246,16 @@ export const FeedPost: React.FC<FeedPostProps> = ({ post }) => {
             </button>
           </div>
         </div>
+
+        {/* Like Status Indicator */}
+        {isLiked && (
+          <div className="px-4 pb-2">
+            <div className="flex items-center gap-2 text-sm text-red-500">
+              <Heart className="w-4 h-4 fill-current" />
+              <span>You liked this post</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
