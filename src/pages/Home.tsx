@@ -1,104 +1,22 @@
-import React, { useState, useEffect } from 'react'
-import { RefreshCw, Filter, Search } from 'lucide-react'
+import React from 'react'
+import { RefreshCw, Search } from 'lucide-react'
 import { FeedPost } from '../components/feed/FeedPost'
+import { FeedFilters } from '../components/feed/FeedFilters'
 import { Button } from '../components/ui/Button'
-import { researchService, type ResearchPaper } from '../services/researchService'
-
-const mockPosts = [
-  {
-    id: '1',
-    title: 'Introduction to Neural Networks',
-    description: 'A beginner-friendly overview of neural networks and their applications in modern AI systems.',
-    author: 'Dr. Alex Chen',
-    authorAvatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150',
-    timeAgo: '2h ago',
-    contentType: 'video',
-    thumbnail: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
-    likes: 342,
-    comments: 47,
-    tags: ['Neural Networks', 'Deep Learning', 'AI Fundamentals']
-  },
-  {
-    id: '2',
-    title: 'Quantum Computing and Machine Learning',
-    description: 'Exploring the intersection of quantum computing and machine learning algorithms.',
-    author: 'Prof. Sarah Johnson',
-    authorAvatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150',
-    timeAgo: '1d ago',
-    contentType: 'paper',
-    thumbnail: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
-    likes: 256,
-    comments: 32,
-    tags: ['Quantum Computing', 'Machine Learning', 'Research']
-  },
-  {
-    id: '3',
-    title: 'The Future of Artificial Intelligence',
-    description: 'A comprehensive look at emerging trends and future possibilities in AI development.',
-    author: 'Dr. Michael Rodriguez',
-    authorAvatar: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150',
-    timeAgo: '3d ago',
-    contentType: 'article',
-    thumbnail: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
-    likes: 189,
-    comments: 28,
-    tags: ['AI Future', 'Technology Trends', 'Innovation']
-  }
-]
+import { useFeedData } from '../hooks/useFeedData'
 
 export const Home: React.FC = () => {
-  const [posts, setPosts] = useState<any[]>(mockPosts)
-  const [researchPapers, setResearchPapers] = useState<ResearchPaper[]>([])
-  const [loading, setLoading] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'papers' | 'videos' | 'articles'>('all')
-  const [searchQuery, setSearchQuery] = useState('')
-
-  // Load research papers on component mount
-  useEffect(() => {
-    loadResearchPapers()
-  }, [])
-
-  const loadResearchPapers = async () => {
-    setLoading(true)
-    try {
-      const papers = await researchService.fetchMixedResearchPapers(15)
-      setResearchPapers(papers)
-      
-      // Merge with mock posts and sort by a mix of recency and engagement
-      const allPosts = [...mockPosts, ...papers].sort(() => Math.random() - 0.5)
-      setPosts(allPosts)
-    } catch (error) {
-      console.error('Error loading research papers:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const refreshFeed = async () => {
-    await loadResearchPapers()
-  }
-
-  const filteredPosts = posts.filter(post => {
-    // Filter by content type
-    if (filter !== 'all') {
-      if (filter === 'papers' && post.contentType !== 'paper') return false
-      if (filter === 'videos' && post.contentType !== 'video') return false
-      if (filter === 'articles' && post.contentType !== 'article') return false
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      return (
-        post.title.toLowerCase().includes(query) ||
-        post.description.toLowerCase().includes(query) ||
-        post.author.toLowerCase().includes(query) ||
-        post.tags.some((tag: string) => tag.toLowerCase().includes(query))
-      )
-    }
-
-    return true
-  })
+  const {
+    posts,
+    loading,
+    error,
+    filter,
+    setFilter,
+    searchQuery,
+    setSearchQuery,
+    refreshFeed,
+    filteredPosts
+  } = useFeedData()
 
   return (
     <div className="space-y-6">
@@ -139,26 +57,7 @@ export const Home: React.FC = () => {
         </div>
 
         {/* Content Type Filter */}
-        <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg p-1">
-          {[
-            { key: 'all', label: 'All' },
-            { key: 'papers', label: 'Papers' },
-            { key: 'videos', label: 'Videos' },
-            { key: 'articles', label: 'Articles' }
-          ].map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setFilter(item.key as any)}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                filter === item.key
-                  ? 'bg-white text-primary-600 shadow-sm dark:bg-neutral-700 dark:text-primary-400'
-                  : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <FeedFilters filter={filter} onFilterChange={setFilter} />
       </div>
 
       {/* Stats */}
@@ -171,7 +70,7 @@ export const Home: React.FC = () => {
         </div>
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {researchPapers.length}
+            {posts.filter(p => p.contentType === 'paper').length}
           </div>
           <div className="text-sm text-neutral-600 dark:text-neutral-400">Research Papers</div>
         </div>
@@ -189,6 +88,18 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></div>
+            <p className="text-red-700 dark:text-red-300 text-sm">
+              {error}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Loading State */}
       {loading && (
         <div className="flex items-center justify-center py-8">
@@ -203,7 +114,7 @@ export const Home: React.FC = () => {
 
       {/* Posts Feed */}
       <div className="space-y-6">
-        {filteredPosts.length === 0 ? (
+        {filteredPosts.length === 0 && !loading ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-neutral-400" />
