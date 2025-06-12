@@ -29,13 +29,11 @@ export const PostDetail: React.FC = () => {
         setLoading(true)
         setError(null)
         
-        // For now, we'll search for papers and find the matching one
-        // In a real app, you'd have a dedicated endpoint for single paper details
-        const { papers } = await semanticScholarService.searchPapers('', 100, 0)
-        const foundPost = papers.find(p => p.id === postId)
+        // Get paper details directly from Semantic Scholar API using the paper ID
+        const paperDetails = await semanticScholarService.getPaperById(postId)
         
-        if (foundPost) {
-          setPost(foundPost)
+        if (paperDetails) {
+          setPost(paperDetails)
         } else {
           setError('Paper not found')
         }

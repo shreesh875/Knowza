@@ -76,6 +76,35 @@ class SemanticScholarService {
     }
   }
 
+  async getPaperById(paperId: string): Promise<FeedPost | null> {
+    try {
+      console.log('Fetching paper by ID:', paperId)
+      
+      const url = new URL(this.baseUrl)
+      url.searchParams.set('paperId', paperId)
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log('Paper fetched successfully:', data.paper ? 'Found' : 'Not found')
+
+      return data.paper || null
+    } catch (error) {
+      console.error('Error fetching paper by ID:', error)
+      throw new Error(`Failed to fetch paper: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
   async getPopularPapers(limit: number = 10): Promise<{ papers: FeedPost[], total: number }> {
     return this.searchPapers('machine learning deep learning', limit, 0)
   }
