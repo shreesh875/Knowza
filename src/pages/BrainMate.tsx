@@ -55,14 +55,6 @@ const initWebGL = (gl: WebGLRenderingContext) => {
   gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW)
 
-  const positionBuffer = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW)
-
-  const texCoordBuffer = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW)
-
   const positionLocation = gl.getAttribLocation(program, 'a_position')
   const texCoordLocation = gl.getAttribLocation(program, 'a_texCoord')
 
