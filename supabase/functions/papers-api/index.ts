@@ -15,6 +15,35 @@ interface Paper {
   fieldsOfStudy: string[]
 }
 
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Increase delay significantly - 2 seconds base delay, exponential backoff for retries
+      const delay = attempt === 1 ? 2000 : 2000 * Math.pow(2, attempt - 1)
+      await new Promise(resolve => setTimeout(resolve, delay))
+      
+      const response = await fetch(url, options)
+      
+      if (response.status === 429) {
+        console.log(`Rate limited (attempt ${attempt}/${maxRetries}), retrying...`)
+        if (attempt === maxRetries) {
+          throw new Error(`Rate limit exceeded after ${maxRetries} attempts`)
+        }
+        continue
+      }
+      
+      return response
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error
+      }
+      console.log(`Request failed (attempt ${attempt}/${maxRetries}), retrying...`)
+    }
+  }
+  
+  throw new Error('Max retries exceeded')
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -31,10 +60,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Fetching papers: query="${query}", limit=${limit}, offset=${offset}`)
 
-    // Add delay to respect rate limits
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${SEMANTIC_SCHOLAR_API}/paper/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&fields=paperId,title,abstract,authors,year,citationCount,url,venue,fieldsOfStudy`,
       {
         headers: {
