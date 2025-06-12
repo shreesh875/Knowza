@@ -1,386 +1,653 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ExternalLink, Heart, Bookmark, Share, Calendar, Users, FileText, Eye, Download, Quote } from 'lucide-react'
-import { Button } from '../components/ui/Button'
+import { ArrowLeft, Heart, MessageCircle, Bookmark, Share, Send, User } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/Card'
-import { CommentsSection } from '../components/feed/CommentsSection'
-import { usePostInteractions } from '../hooks/usePostInteractions'
+import { Avatar } from '../components/ui/Avatar'
+import { Button } from '../components/ui/Button'
 import { useUser } from '../contexts/UserContext'
-import type { FeedPost } from '../services/semanticScholarService'
-import SemanticScholarService from '../services/semanticScholarService'
-import OpenAlexService from '../services/openAlexService'
+import { supabase } from '../lib/supabase'
+
+// Mock data - in a real app, this would come from your API
+const mockPosts = [
+  {
+    id: '1',
+    title: 'Introduction to Neural Networks',
+    description: 'A beginner-friendly overview of neural networks and their applications in modern AI systems.',
+    content: `Neural networks are computational models inspired by the human brain's structure and function. They consist of interconnected nodes (neurons) that process information through weighted connections.
+
+## Key Components
+
+### 1. Neurons (Nodes)
+Each neuron receives inputs, processes them using an activation function, and produces an output. The basic structure includes:
+- Input layer: Receives raw data
+- Hidden layers: Process information through weighted connections
+- Output layer: Produces final results
+
+### 2. Weights and Biases
+- **Weights**: Determine the strength of connections between neurons
+- **Biases**: Allow neurons to activate even when inputs are zero
+
+### 3. Activation Functions
+Common activation functions include:
+- **ReLU (Rectified Linear Unit)**: f(x) = max(0, x)
+- **Sigmoid**: f(x) = 1 / (1 + e^(-x))
+- **Tanh**: f(x) = (e^x - e^(-x)) / (e^x + e^(-x))
+
+## Training Process
+
+Neural networks learn through a process called backpropagation:
+
+1. **Forward Pass**: Data flows from input to output
+2. **Loss Calculation**: Compare predicted vs actual outputs
+3. **Backward Pass**: Adjust weights to minimize loss
+4. **Iteration**: Repeat until convergence
+
+## Applications
+
+Neural networks excel in various domains:
+- **Computer Vision**: Image recognition, object detection
+- **Natural Language Processing**: Translation, sentiment analysis
+- **Speech Recognition**: Voice assistants, transcription
+- **Recommendation Systems**: Content and product suggestions
+
+## Types of Neural Networks
+
+### Feedforward Networks
+Information flows in one direction from input to output.
+
+### Convolutional Neural Networks (CNNs)
+Specialized for processing grid-like data such as images.
+
+### Recurrent Neural Networks (RNNs)
+Can process sequences of data by maintaining internal memory.
+
+### Long Short-Term Memory (LSTM)
+A type of RNN that can learn long-term dependencies.
+
+## Getting Started
+
+To begin working with neural networks:
+
+1. **Learn the fundamentals** of linear algebra and calculus
+2. **Choose a framework** like TensorFlow, PyTorch, or Keras
+3. **Start with simple projects** like digit recognition
+4. **Gradually increase complexity** as you gain experience
+
+Neural networks represent a powerful tool in the machine learning toolkit, offering solutions to complex problems across numerous fields.`,
+    author: 'Dr. Alex Chen',
+    authorAvatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150',
+    timeAgo: '2h ago',
+    contentType: 'video',
+    thumbnail: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+    likes: 342,
+    comments: 47,
+    tags: ['Neural Networks', 'Deep Learning', 'AI Fundamentals']
+  },
+  {
+    id: '2',
+    title: 'Quantum Computing and Machine Learning',
+    description: 'Exploring the intersection of quantum computing and machine learning algorithms.',
+    content: `Quantum computing represents a paradigm shift in computational power, offering exponential speedups for certain types of problems. When combined with machine learning, it opens up new possibilities for solving complex optimization and pattern recognition tasks.
+
+## Quantum Computing Fundamentals
+
+### Qubits vs Classical Bits
+- **Classical bits**: Can be either 0 or 1
+- **Qubits**: Can exist in superposition of both 0 and 1 simultaneously
+
+### Key Quantum Phenomena
+- **Superposition**: Qubits can be in multiple states simultaneously
+- **Entanglement**: Qubits can be correlated in ways that classical systems cannot
+- **Interference**: Quantum states can interfere constructively or destructively
+
+## Quantum Machine Learning Algorithms
+
+### 1. Quantum Support Vector Machines
+Leverage quantum feature maps to classify data in high-dimensional spaces more efficiently than classical methods.
+
+### 2. Quantum Neural Networks
+Implement neural network computations using quantum circuits, potentially offering exponential speedups.
+
+### 3. Quantum Principal Component Analysis
+Perform dimensionality reduction on quantum data exponentially faster than classical PCA.
+
+### 4. Variational Quantum Eigensolvers (VQE)
+Hybrid quantum-classical algorithms for optimization problems in machine learning.
+
+## Applications
+
+### Drug Discovery
+Quantum computers can simulate molecular interactions more accurately, accelerating the discovery of new pharmaceuticals.
+
+### Financial Modeling
+Portfolio optimization and risk analysis can benefit from quantum algorithms' ability to explore multiple scenarios simultaneously.
+
+### Cryptography and Security
+Quantum machine learning can enhance both cryptographic methods and their analysis.
+
+## Current Limitations
+
+### Noise and Decoherence
+Current quantum computers are noisy and lose quantum information quickly.
+
+### Limited Qubit Count
+Today's quantum computers have relatively few qubits compared to what's needed for large-scale applications.
+
+### Error Rates
+Quantum operations are prone to errors, requiring sophisticated error correction schemes.
+
+## The Road Ahead
+
+### Near-term Applications
+- Quantum advantage in specific optimization problems
+- Hybrid quantum-classical algorithms
+- Quantum-inspired classical algorithms
+
+### Long-term Vision
+- Fault-tolerant quantum computers
+- Quantum internet and distributed quantum computing
+- Revolutionary advances in AI and machine learning
+
+The intersection of quantum computing and machine learning represents one of the most exciting frontiers in technology, promising to solve problems that are intractable for classical computers.`,
+    author: 'Prof. Sarah Johnson',
+    authorAvatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150',
+    timeAgo: '1d ago',
+    contentType: 'paper',
+    thumbnail: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+    likes: 256,
+    comments: 32,
+    tags: ['Quantum Computing', 'Machine Learning', 'Research']
+  },
+  {
+    id: '3',
+    title: 'The Future of Artificial Intelligence',
+    description: 'A comprehensive look at emerging trends and future possibilities in AI development.',
+    content: `Artificial Intelligence stands at the threshold of unprecedented advancement. As we look toward the future, several key trends and developments are shaping the landscape of AI technology and its applications across industries.
+
+## Current State of AI
+
+### Machine Learning Dominance
+Today's AI is primarily driven by machine learning, particularly deep learning neural networks that have achieved remarkable success in:
+- Image and speech recognition
+- Natural language processing
+- Game playing and strategic thinking
+- Autonomous systems
+
+### Limitations of Current AI
+Despite impressive achievements, current AI systems face significant limitations:
+- Lack of general intelligence
+- Brittleness and lack of robustness
+- Limited ability to transfer learning across domains
+- Dependence on large datasets
+
+## Emerging Trends
+
+### 1. Artificial General Intelligence (AGI)
+The holy grail of AI research, AGI represents systems that can understand, learn, and apply intelligence across a wide range of tasks at human level.
+
+**Timeline Predictions:**
+- Conservative estimates: 2040-2060
+- Optimistic projections: 2030-2040
+- Challenges remain significant
+
+### 2. Multimodal AI Systems
+Future AI will seamlessly integrate multiple types of data:
+- Text, images, audio, and video
+- Sensor data from IoT devices
+- Real-time environmental information
+
+### 3. Explainable AI (XAI)
+As AI systems become more complex, the need for transparency grows:
+- Interpretable machine learning models
+- AI decision auditing capabilities
+- Regulatory compliance requirements
+
+### 4. Edge AI and Distributed Intelligence
+Moving AI processing closer to data sources:
+- Reduced latency and bandwidth requirements
+- Enhanced privacy and security
+- Autonomous operation in disconnected environments
+
+## Transformative Applications
+
+### Healthcare Revolution
+- Personalized medicine based on genetic profiles
+- Real-time health monitoring and prediction
+- AI-assisted surgery and diagnosis
+- Drug discovery acceleration
+
+### Autonomous Everything
+- Self-driving vehicles and transportation systems
+- Autonomous drones for delivery and surveillance
+- Smart cities with self-managing infrastructure
+- Robotic assistants in homes and workplaces
+
+### Scientific Discovery
+- AI-driven hypothesis generation
+- Automated experimentation and analysis
+- Climate modeling and environmental protection
+- Space exploration and astronomy
+
+### Creative Industries
+- AI-generated art, music, and literature
+- Personalized entertainment content
+- Interactive and immersive experiences
+- Collaborative human-AI creativity
+
+## Challenges and Considerations
+
+### Ethical Implications
+- Bias and fairness in AI systems
+- Privacy and surveillance concerns
+- Autonomous weapons and military applications
+- Impact on employment and society
+
+### Technical Challenges
+- Energy consumption and environmental impact
+- Cybersecurity and AI safety
+- Data quality and availability
+- Computational resource requirements
+
+### Regulatory and Governance
+- International AI governance frameworks
+- Standards and certification processes
+- Liability and accountability questions
+- Balancing innovation with safety
+
+## Preparing for the AI Future
+
+### Education and Workforce Development
+- Reskilling and upskilling programs
+- AI literacy for all professions
+- New educational paradigms
+- Lifelong learning approaches
+
+### Infrastructure Requirements
+- High-performance computing resources
+- Advanced networking capabilities
+- Data storage and management systems
+- Energy-efficient hardware
+
+### Collaboration and Partnerships
+- Public-private partnerships
+- International cooperation
+- Academic-industry collaboration
+- Open source development
+
+## Conclusion
+
+The future of AI holds immense promise for solving humanity's greatest challenges while also presenting significant risks that must be carefully managed. Success will require thoughtful planning, ethical consideration, and collaborative effort across all sectors of society.
+
+As we stand on the brink of this AI revolution, our choices today will determine whether artificial intelligence becomes humanity's greatest tool for progress or its greatest challenge. The future is not predetermined – it is ours to shape.`,
+    author: 'Dr. Michael Rodriguez',
+    authorAvatar: 'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150',
+    timeAgo: '3d ago',
+    contentType: 'article',
+    thumbnail: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+    likes: 189,
+    comments: 28,
+    tags: ['AI Future', 'Technology Trends', 'Innovation']
+  }
+]
+
+interface Comment {
+  id: string
+  content: string
+  author: string
+  authorAvatar: string
+  timeAgo: string
+  userId: string
+}
 
 export const PostDetail: React.FC = () => {
   const { postId } = useParams<{ postId: string }>()
   const navigate = useNavigate()
   const { user } = useUser()
-  const [post, setPost] = useState<FeedPost | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isSaved, setIsSaved] = useState(false)
-
-  const {
-    likesCount,
-    commentsCount,
-    isLiked,
-    comments,
-    loading: interactionsLoading,
-    error: interactionsError,
-    toggleLike,
-    addComment,
-    deleteComment,
-  } = usePostInteractions(postId || '')
-
-  const semanticScholarService = new SemanticScholarService()
-  const openAlexService = new OpenAlexService()
+  
+  const [post, setPost] = useState<any>(null)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [newComment, setNewComment] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [likesCount, setLikesCount] = useState(0)
+  const [isLiked, setIsLiked] = useState(false)
+  const [isLiking, setIsLiking] = useState(false)
 
   useEffect(() => {
-    const loadPost = async () => {
-      if (!postId) {
-        setError('Post ID not found')
-        setLoading(false)
-        return
-      }
-
-      try {
-        setLoading(true)
-        setError(null)
-        
-        // Try OpenAlex first (since it's our primary source now)
-        let paperDetails: FeedPost | null = null
-        
-        try {
-          paperDetails = await openAlexService.getWorkById(postId)
-        } catch (openAlexError) {
-          console.log('OpenAlex failed, trying Semantic Scholar:', openAlexError)
-          // Fallback to Semantic Scholar
-          try {
-            paperDetails = await semanticScholarService.getPaperById(postId)
-          } catch (semanticScholarError) {
-            console.error('Both services failed:', { openAlexError, semanticScholarError })
-          }
-        }
-        
-        if (paperDetails) {
-          setPost(paperDetails)
-        } else {
-          setError('Paper not found in any database')
-        }
-      } catch (err) {
-        console.error('Error loading post:', err)
-        setError('Failed to load paper details')
-      } finally {
-        setLoading(false)
-      }
+    // Find the post by ID
+    const foundPost = mockPosts.find(p => p.id === postId)
+    if (foundPost) {
+      setPost(foundPost)
+      setLikesCount(foundPost.likes)
+      loadComments()
     }
-
-    loadPost()
   }, [postId])
 
-  const handleBack = () => {
-    navigate(-1)
-  }
+  const loadComments = async () => {
+    if (!postId) return
 
-  const handleReadPaper = () => {
-    if (post?.content_url) {
-      window.open(post.content_url, '_blank', 'noopener,noreferrer')
-    }
-  }
-
-  const handleLike = () => {
-    if (!user) {
-      console.log('User must be signed in to like posts')
-      return
-    }
-    toggleLike()
-  }
-
-  const handleSave = () => {
-    setIsSaved(!isSaved)
-    // TODO: Implement actual save functionality
-  }
-
-  const handleShare = () => {
-    if (navigator.share && post) {
-      navigator.share({
-        title: post.title,
-        text: post.description,
-        url: window.location.href,
-      })
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href)
-    }
-  }
-
-  const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString)
-      return date.getFullYear().toString()
-    } catch {
-      return 'Unknown'
+      const { data, error } = await supabase
+        .from('post_comments')
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          profiles!inner(username, full_name, avatar_url)
+        `)
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      const formattedComments = data.map(comment => ({
+        id: comment.id,
+        content: comment.content,
+        author: comment.profiles.full_name || comment.profiles.username,
+        authorAvatar: comment.profiles.avatar_url || '',
+        timeAgo: new Date(comment.created_at).toLocaleDateString(),
+        userId: comment.user_id
+      }))
+
+      setComments(formattedComments)
+    } catch (error) {
+      console.error('Error loading comments:', error)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-neutral-600 dark:text-neutral-400">Loading paper details...</p>
-          </div>
-        </div>
-      </div>
-    )
+  const handleLike = async () => {
+    if (!user || !postId || isLiking) return
+
+    setIsLiking(true)
+
+    try {
+      if (isLiked) {
+        // Unlike the post
+        const { error } = await supabase
+          .from('post_likes')
+          .delete()
+          .eq('post_id', postId)
+          .eq('user_id', user.id)
+
+        if (error) throw error
+
+        setIsLiked(false)
+        setLikesCount(prev => prev - 1)
+      } else {
+        // Like the post
+        const { error } = await supabase
+          .from('post_likes')
+          .insert({
+            post_id: postId,
+            user_id: user.id
+          })
+
+        if (error) throw error
+
+        setIsLiked(true)
+        setLikesCount(prev => prev + 1)
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error)
+    } finally {
+      setIsLiking(false)
+    }
   }
 
-  if (error || !post) {
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!user || !postId || !newComment.trim() || isSubmitting) return
+
+    setIsSubmitting(true)
+
+    try {
+      const { error } = await supabase
+        .from('post_comments')
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+          content: newComment.trim()
+        })
+
+      if (error) throw error
+
+      setNewComment('')
+      await loadComments() // Reload comments to show the new one
+    } catch (error) {
+      console.error('Error submitting comment:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (!post) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack}>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+            Post not found
+          </h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+            The post you're looking for doesn't exist or has been removed.
+          </p>
+          <Button onClick={() => navigate('/')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Back to Feed
           </Button>
         </div>
-        <Card>
-          <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-error-100 dark:bg-error-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-error-600 dark:text-error-400" />
-            </div>
-            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">
-              Paper Not Found
-            </h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-              {error || 'The requested research paper could not be found.'}
-            </p>
-            <Button onClick={handleBack} variant="outline">
-              Go Back
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={handleBack}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Feed
-        </Button>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLike}
-            disabled={interactionsLoading || !user}
-            className={isLiked ? 'text-red-600 border-red-300' : ''}
-          >
-            <Heart className={`w-4 h-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-            {likesCount}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSave}
-            className={isSaved ? 'text-primary-600 border-primary-300' : ''}
-          >
-            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleShare}>
-            <Share className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate('/')}
+        className="mb-4"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Feed
+      </Button>
 
-      {/* Paper Header */}
+      {/* Post Content */}
       <Card>
-        <CardContent className="p-8">
-          <div className="space-y-6">
-            {/* Title */}
+        <CardContent className="p-6">
+          {/* Post Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <Avatar src={post.authorAvatar} alt={post.author} size="md" />
             <div>
-              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white leading-tight mb-4">
-                {post.title}
-              </h1>
-              
-              {/* Metadata */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 dark:text-neutral-400">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span className="font-medium">{post.author}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Published {formatDate(post.published_at)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  <span>{likesCount * 10} views</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Quote className="w-4 h-4" />
-                  <span>{likesCount} citations</span>
-                </div>
-              </div>
+              <h3 className="font-semibold text-neutral-900 dark:text-white">
+                {post.author}
+              </h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                {post.timeAgo} • {post.contentType}
+              </p>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={handleReadPaper} size="lg" className="flex-1 sm:flex-none">
-                <ExternalLink className="w-5 h-5 mr-2" />
-                Read Full Paper
-              </Button>
-              <Button variant="outline" size="lg">
-                <Download className="w-5 h-5 mr-2" />
-                Download PDF
-              </Button>
-            </div>
-
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  Research Fields
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 text-sm font-medium bg-primary-100 text-primary-700 rounded-full dark:bg-primary-900/20 dark:text-primary-400"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Paper Content */}
-      <Card>
-        <CardContent className="p-8">
-          <div className="space-y-6">
-            {/* Abstract */}
-            <div>
-              <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
-                Abstract
-              </h2>
-              <div className="prose prose-neutral dark:prose-invert max-w-none">
-                <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed text-lg">
-                  {post.description || 'No abstract available for this paper.'}
+          {/* Title and Description */}
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
+            {post.title}
+          </h1>
+          <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-6">
+            {post.description}
+          </p>
+
+          {/* Thumbnail */}
+          <div className="relative mb-6 rounded-lg overflow-hidden">
+            <img
+              src={post.thumbnail}
+              alt={post.title}
+              className="w-full h-80 object-cover"
+            />
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {post.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="px-3 py-1 text-sm font-medium bg-primary-100 text-primary-700 rounded-full dark:bg-primary-900/20 dark:text-primary-400"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-6 mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
+            <button 
+              onClick={handleLike}
+              disabled={isLiking || !user}
+              className={`flex items-center gap-2 transition-colors ${
+                isLiked 
+                  ? 'text-red-500' 
+                  : 'text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400'
+              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+              <span className="font-medium">{likesCount}</span>
+            </button>
+            <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+              <MessageCircle className="w-6 h-6" />
+              <span className="font-medium">{comments.length}</span>
+            </div>
+            <button className="p-2 text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors">
+              <Bookmark className="w-6 h-6" />
+            </button>
+            <button className="p-2 text-neutral-600 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 transition-colors">
+              <Share className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            {post.content.split('\n').map((paragraph: string, index: number) => {
+              if (paragraph.startsWith('## ')) {
+                return (
+                  <h2 key={index} className="text-2xl font-bold mt-8 mb-4 text-neutral-900 dark:text-white">
+                    {paragraph.replace('## ', '')}
+                  </h2>
+                )
+              }
+              if (paragraph.startsWith('### ')) {
+                return (
+                  <h3 key={index} className="text-xl font-semibold mt-6 mb-3 text-neutral-900 dark:text-white">
+                    {paragraph.replace('### ', '')}
+                  </h3>
+                )
+              }
+              if (paragraph.startsWith('- ')) {
+                return (
+                  <li key={index} className="ml-4 text-neutral-700 dark:text-neutral-300">
+                    {paragraph.replace('- ', '')}
+                  </li>
+                )
+              }
+              if (paragraph.trim() === '') {
+                return <br key={index} />
+              }
+              return (
+                <p key={index} className="mb-4 text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                  {paragraph}
                 </p>
-              </div>
-            </div>
-
-            {/* Paper Preview */}
-            {post.thumbnail_url && (
-              <div>
-                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
-                  Preview
-                </h2>
-                <div className="relative rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                  <img
-                    src={post.thumbnail_url}
-                    alt={post.title}
-                    className="w-full h-64 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                </div>
-              </div>
-            )}
-
-            {/* Key Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                  Paper Details
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Authors:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{post.author}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Year:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{formatDate(post.published_at)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Citations:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{likesCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Type:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium capitalize">{post.content_type}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                  Engagement
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Likes:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{likesCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Comments:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{commentsCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600 dark:text-neutral-400">Views:</span>
-                    <span className="text-neutral-900 dark:text-white font-medium">{likesCount * 10}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Call to Action */}
-            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-6 border border-primary-200 dark:border-primary-800">
-              <div className="text-center space-y-4">
-                <h3 className="text-lg font-semibold text-primary-900 dark:text-primary-100">
-                  Ready to dive deeper?
-                </h3>
-                <p className="text-primary-700 dark:text-primary-300">
-                  Access the full research paper to explore detailed methodologies, results, and conclusions.
-                </p>
-                <Button onClick={handleReadPaper} size="lg" className="bg-primary-600 hover:bg-primary-700">
-                  <ExternalLink className="w-5 h-5 mr-2" />
-                  Read Full Paper
-                </Button>
-              </div>
-            </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
 
       {/* Comments Section */}
-      <Card>
-        <CardContent className="p-8">
+      <Card id="comments">
+        <CardContent className="p-6">
           <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-6">
-            Discussion
+            Comments ({comments.length})
           </h2>
-          <CommentsSection
-            comments={comments}
-            commentsCount={commentsCount}
-            onAddComment={addComment}
-            onDeleteComment={deleteComment}
-            loading={interactionsLoading}
-            error={interactionsError}
-          />
+
+          {/* Add Comment Form */}
+          {user ? (
+            <form onSubmit={handleSubmitComment} className="mb-6">
+              <div className="flex gap-3">
+                <Avatar 
+                  src={user.user_metadata?.avatar_url} 
+                  alt={user.user_metadata?.full_name || 'You'} 
+                  size="md" 
+                />
+                <div className="flex-1">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Add a comment..."
+                    className="w-full p-3 border border-neutral-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
+                    rows={3}
+                  />
+                  <div className="flex justify-end mt-2">
+                    <Button 
+                      type="submit" 
+                      disabled={!newComment.trim() || isSubmitting}
+                      size="sm"
+                    >
+                      {isSubmitting ? (
+                        'Posting...'
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Post Comment
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          ) : (
+            <div className="mb-6 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-center">
+              <p className="text-neutral-600 dark:text-neutral-400">
+                Please sign in to add a comment.
+              </p>
+            </div>
+          )}
+
+          {/* Comments List */}
+          <div className="space-y-4">
+            {comments.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageCircle className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  No comments yet. Be the first to share your thoughts!
+                </p>
+              </div>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3">
+                  <Avatar 
+                    src={comment.authorAvatar} 
+                    alt={comment.author} 
+                    size="md"
+                    fallback={comment.author}
+                  />
+                  <div className="flex-1">
+                    <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-neutral-900 dark:text-white">
+                          {comment.author}
+                        </span>
+                        <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                          {comment.timeAgo}
+                        </span>
+                      </div>
+                      <p className="text-neutral-700 dark:text-neutral-300">
+                        {comment.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
