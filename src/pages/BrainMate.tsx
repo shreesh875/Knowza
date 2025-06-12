@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
 import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle, Settings } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/Card'
@@ -46,6 +46,14 @@ const initWebGL = (gl: WebGLRenderingContext) => {
   gl.attachShader(program, initShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource))
   gl.linkProgram(program)
   gl.useProgram(program)
+
+  const positionBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW)
+
+  const texCoordBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW)
 
   const positionBuffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
@@ -691,17 +699,17 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
               className="w-full resize-none rounded-lg border border-neutral-300 px-4 py-3 text-neutral-900 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-400 disabled:opacity-50 transition-all"
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
-            <div className="absolute bottom-2 right-2 text-xs text-neutral-400 dark:text-neutral-500">
-              {inputMessage.length > 0 && (
+            {inputMessage.length > 0 && (
+              <div className="absolute bottom-2 right-2 text-xs text-neutral-400 dark:text-neutral-500">
                 <span>Press Enter to send, Shift+Enter for new line</span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
           <Button 
             onClick={handleSendMessage} 
             disabled={isLoading || !inputMessage.trim()}
             size="lg"
-            className="h-12 w-12 rounded-lg flex-shrink-0"
+            className="h-12 w-12 rounded-lg flex-shrink-0 p-0"
           >
             <Send className="w-5 h-5" />
           </Button>
