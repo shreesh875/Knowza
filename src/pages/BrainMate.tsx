@@ -465,6 +465,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [inputMessage, setInputMessage] = useState('')
   const [streamingResponse, setStreamingResponse] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Initialize DeepSeek chat hook
   const { sendMessage: sendDeepSeekMessage, isLoading, isConfigured } = useDeepSeekChat(openRouterApiKey)
@@ -476,6 +477,14 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   useEffect(() => {
     scrollToBottom()
   }, [messages, streamingResponse])
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`
+    }
+  }, [inputMessage])
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading || !openRouterApiKey || !isConfigured) return
@@ -503,6 +512,13 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
     )
   }
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
+
   const handleQuickAction = (action: string) => {
     let message = ''
     switch (action) {
@@ -520,6 +536,10 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
         break
     }
     setInputMessage(message)
+    // Focus the textarea after setting the message
+    setTimeout(() => {
+      textareaRef.current?.focus()
+    }, 0)
   }
 
   if (!openRouterApiKey || !isConfigured) {
@@ -656,20 +676,38 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
         </button>
       </div>
 
-      {/* Input */}
+      {/* Enhanced Input Area */}
       <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
-        <div className="flex gap-2">
-          <Input
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Ask about your feed content, request explanations, or get study help..."
-            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-            className="flex-1"
-            disabled={isLoading}
-          />
-          <Button onClick={handleSendMessage} disabled={isLoading || !inputMessage.trim()}>
-            <Send className="w-4 h-4" />
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 relative">
+            <textarea
+              ref={textareaRef}
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about your feed content, request explanations, or get study help..."
+              disabled={isLoading}
+              rows={1}
+              className="w-full resize-none rounded-lg border border-neutral-300 px-4 py-3 text-neutral-900 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-400 disabled:opacity-50 transition-all"
+              style={{ minHeight: '48px', maxHeight: '120px' }}
+            />
+            <div className="absolute bottom-2 right-2 text-xs text-neutral-400 dark:text-neutral-500">
+              {inputMessage.length > 0 && (
+                <span>Press Enter to send, Shift+Enter for new line</span>
+              )}
+            </div>
+          </div>
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={isLoading || !inputMessage.trim()}
+            size="lg"
+            className="h-12 w-12 rounded-lg flex-shrink-0"
+          >
+            <Send className="w-5 h-5" />
           </Button>
+        </div>
+        <div className="mt-2 text-xs text-neutral-500 dark:text-neutral-400 text-center">
+          Powered by DeepSeek V3 via OpenRouter • Free AI model
         </div>
       </div>
     </div>
