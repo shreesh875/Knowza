@@ -700,7 +700,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !inputMessage.trim()}
-            className="h-12 w-12 rounded-lg flex-shrink-0 p-0 bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center"
+            className="h-12 w-12 rounded-lg flex-shrink-0 p-0 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 active:from-primary-800 active:to-primary-900 disabled:from-neutral-400 disabled:to-neutral-500 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none disabled:shadow-none"
           >
             <Send className="w-5 h-5" />
           </button>
