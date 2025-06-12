@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Home, Bot, BarChart3, User, Lightbulb, Moon, Sun, LogOut } from 'lucide-react'
+import { Home, Bot, BarChart3, User, Moon, Sun, LogOut } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { Avatar } from '../ui/Avatar'
 
@@ -18,7 +18,11 @@ export const Sidebar: React.FC = () => {
     <div className="flex flex-col h-full bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
-        <Lightbulb className="w-8 h-8 text-primary-600" />
+        <img 
+          src="/BrainFeed No bg Logo(only symbol).png" 
+          alt="BrainFeed" 
+          className="w-8 h-8"
+        />
         <span className="text-xl font-bold text-neutral-900 dark:text-white">BrainFeed</span>
       </div>
 

@@ -1,5 +1,4 @@
 import React from 'react'
-import { Lightbulb } from 'lucide-react'
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -23,7 +22,11 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-12 text-white">
         <div className="flex flex-col justify-center max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <Lightbulb className="w-8 h-8" />
+            <img 
+              src="/BrainFeed No bg Logo(only symbol).png" 
+              alt="BrainFeed" 
+              className="w-8 h-8"
+            />
             <span className="text-2xl font-bold">BrainFeed</span>
           </div>
           
