@@ -25,153 +25,60 @@ export const useUser = () => {
 }
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Temporarily disabled authentication - set demo user
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [profile, setProfile] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Set to false since we're not loading anything
 
   const fetchProfile = async (userId: string) => {
-    try {
-      console.log('Fetching profile for user:', userId)
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        console.error('Profile fetch error:', error)
-        // If profile doesn't exist, create one
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found, creating new profile...')
-          const { data: userData } = await supabase.auth.getUser()
-          if (userData.user) {
-            const newProfile = {
-              id: userData.user.id,
-              username: userData.user.email?.split('@')[0] || 'user',
-              full_name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || 'User',
-              avatar_url: userData.user.user_metadata?.avatar_url,
-              points: 0,
-              streak: 0,
-              onboarding_completed: false
-            }
-
-            const { data: createdProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert(newProfile)
-              .select()
-              .single()
-
-            if (createError) {
-              console.error('Error creating profile:', createError)
-              throw createError
-            }
-            
-            console.log('Profile created successfully:', createdProfile)
-            setProfile(createdProfile)
-          }
-        } else {
-          throw error
-        }
-      } else {
-        console.log('Profile fetched successfully:', data)
-        setProfile(data)
-      }
-    } catch (error) {
-      console.error('Error in fetchProfile:', error)
-    } finally {
-      setLoading(false)
-    }
+    // Temporarily disabled - return demo profile
+    console.log('Profile fetching disabled for demo')
+    return
   }
 
   const refreshProfile = async () => {
-    if (user) {
-      await fetchProfile(user.id)
-    }
+    // Temporarily disabled
+    console.log('Profile refresh disabled for demo')
+    return
   }
 
   useEffect(() => {
-    console.log('UserProvider: Initializing...')
+    console.log('UserProvider: Authentication disabled for demo')
+    setLoading(false)
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('Error getting session:', error)
-        setLoading(false)
-        return
-      }
-      
-      console.log('Initial session:', session?.user?.id || 'No session')
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
+    // Set demo user and profile
+    setUser(null) // No real user for demo
+    setProfile({
+      id: 'demo-user-id',
+      username: 'demouser',
+      full_name: 'Demo User',
+      avatar_url: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150',
+      points: 120,
+      streak: 3,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      onboarding_completed: true
     })
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id || 'No user')
-        
-        setUser(session?.user ?? null)
-        
-        if (session?.user) {
-          await fetchProfile(session.user.id)
-        } else {
-          setProfile(null)
-          setLoading(false)
-        }
-      }
-    )
-
-    return () => {
-      console.log('UserProvider: Cleaning up subscription')
-      subscription.unsubscribe()
-    }
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) throw error
+    console.log('Sign in disabled for demo')
+    throw new Error('Authentication disabled for demo')
   }
 
   const signUp = async (email: string, password: string, fullName: string, username: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          username: username,
-        },
-      },
-    })
-    if (error) throw error
+    console.log('Sign up disabled for demo')
+    throw new Error('Authentication disabled for demo')
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    console.log('Sign out disabled for demo')
+    // Don't actually sign out in demo mode
   }
 
   const updateProfile = async (updates: Partial<User>) => {
-    if (!user) throw new Error('No user logged in')
-
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-
-    if (error) throw error
-    
-    // Refresh profile
-    await fetchProfile(user.id)
+    console.log('Profile update disabled for demo')
+    // Don't actually update in demo mode
   }
 
   const value = {
@@ -185,7 +92,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfile,
   }
 
-  console.log('UserProvider state:', { 
+  console.log('UserProvider state (demo mode):', { 
     hasUser: !!user, 
     hasProfile: !!profile, 
     loading, 

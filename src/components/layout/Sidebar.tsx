@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { Home, Bot, BarChart3, User, Moon, Sun, LogOut } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
-import { useUser } from '../../contexts/UserContext'
+// import { useUser } from '../../contexts/UserContext'
 import { Avatar } from '../ui/Avatar'
 
 const navigation = [
@@ -14,14 +14,16 @@ const navigation = [
 
 export const Sidebar: React.FC = () => {
   const { theme, toggleTheme } = useTheme()
-  const { user, profile, signOut } = useUser()
+  // const { user, profile, signOut } = useUser()
 
+  // Temporarily disabled sign out functionality
   const handleSignOut = async () => {
-    try {
-      await signOut()
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
+    console.log('Sign out disabled for demo')
+    // try {
+    //   await signOut()
+    // } catch (error) {
+    //   console.error('Error signing out:', error)
+    // }
   }
 
   return (
@@ -36,20 +38,20 @@ export const Sidebar: React.FC = () => {
         <span className="text-xl font-bold text-neutral-900 dark:text-white">BrainFeed</span>
       </div>
 
-      {/* User Profile */}
+      {/* User Profile - Demo User */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
         <Avatar
-          src={profile?.avatar_url || user?.user_metadata?.avatar_url}
-          alt={profile?.full_name || user?.user_metadata?.full_name || 'User'}
+          src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150"
+          alt="Demo User"
           size="md"
-          fallback={profile?.full_name || user?.user_metadata?.full_name || user?.email}
+          fallback="Demo User"
         />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
-            {profile?.full_name || user?.user_metadata?.full_name || 'User'}
+            Demo User
           </p>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
-            @{profile?.username || user?.user_metadata?.username || 'user'}
+            @demouser
           </p>
         </div>
       </div>
@@ -89,7 +91,7 @@ export const Sidebar: React.FC = () => {
           className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5" />
-          Logout
+          Logout (Disabled)
         </button>
       </div>
     </div>
