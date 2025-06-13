@@ -10,6 +10,7 @@ import { Profile } from './pages/Profile'
 import { BrainMate } from './pages/BrainMate'
 import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
+import { InterestSelection } from './pages/InterestSelection'
 
 function App() {
   return (
@@ -36,11 +37,21 @@ function App() {
                 } 
               />
               
+              {/* Onboarding Routes */}
+              <Route 
+                path="/onboarding/interests" 
+                element={
+                  <ProtectedRoute requireAuth={true} requireOnboarding={false}>
+                    <InterestSelection />
+                  </ProtectedRoute>
+                } 
+              />
+              
               {/* Protected Routes */}
               <Route 
                 path="/" 
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireAuth={true} requireOnboarding={true}>
                     <Layout />
                   </ProtectedRoute>
                 }

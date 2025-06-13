@@ -1,4 +1,4 @@
-// Single Responsibility: Handle route protection based on authentication
+// Single Responsibility: Handle route protection based on authentication and onboarding
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useUser } from '../../contexts/UserContext'
@@ -6,13 +6,15 @@ import { useUser } from '../../contexts/UserContext'
 interface ProtectedRouteProps {
   children: React.ReactNode
   requireAuth?: boolean
+  requireOnboarding?: boolean
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireAuth = true 
+  requireAuth = true,
+  requireOnboarding = true
 }) => {
-  const { user, loading } = useUser()
+  const { user, profile, loading } = useUser()
   const location = useLocation()
 
   // Show loading spinner while checking authentication
@@ -34,7 +36,25 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If user is authenticated but trying to access auth pages
   if (!requireAuth && user) {
+    // If user hasn't completed onboarding, redirect to interests selection
+    if (profile && !profile.onboarding_completed) {
+      return <Navigate to="/onboarding/interests" replace />
+    }
+    // Otherwise redirect to home
     return <Navigate to="/" replace />
+  }
+
+  // If user is authenticated and onboarding is required
+  if (requireAuth && requireOnboarding && user && profile) {
+    // If user hasn't completed onboarding and is not on the onboarding page
+    if (!profile.onboarding_completed && location.pathname !== '/onboarding/interests') {
+      return <Navigate to="/onboarding/interests" replace />
+    }
+    
+    // If user has completed onboarding but is trying to access onboarding page
+    if (profile.onboarding_completed && location.pathname === '/onboarding/interests') {
+      return <Navigate to="/" replace />
+    }
   }
 
   return <>{children}</>
