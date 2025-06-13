@@ -68,11 +68,11 @@ export const SignIn: React.FC = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img 
-              src="/image.png" 
-              alt="BrainFeed" 
+              src="/Knowza Symbol.png" 
+              alt="Knowza" 
               className="w-10 h-10"
             />
-            <span className="text-2xl font-bold text-neutral-900 dark:text-white">BrainFeed</span>
+            <span className="text-2xl font-bold text-neutral-900 dark:text-white">Knowza</span>
           </div>
           <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
             Welcome Back

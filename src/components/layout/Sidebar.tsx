@@ -31,11 +31,11 @@ export const Sidebar: React.FC = () => {
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
         <img 
-          src="/image.png" 
-          alt="BrainFeed" 
+          src="/Knowza Symbol.png" 
+          alt="Knowza" 
           className="w-8 h-8"
         />
-        <span className="text-xl font-bold text-neutral-900 dark:text-white">BrainFeed</span>
+        <span className="text-xl font-bold text-neutral-900 dark:text-white">Knowza</span>
       </div>
 
       {/* User Profile - Demo User */}
