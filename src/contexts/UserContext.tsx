@@ -11,6 +11,7 @@ interface UserContextType {
   signUp: (email: string, password: string, fullName: string, username: string) => Promise<void>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<User>) => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -28,10 +29,81 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchProfile = async (userId: string) => {
+    try {
+      console.log('Fetching profile for user:', userId)
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) {
+        console.error('Profile fetch error:', error)
+        // If profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile...')
+          const { data: userData } = await supabase.auth.getUser()
+          if (userData.user) {
+            const newProfile = {
+              id: userData.user.id,
+              username: userData.user.email?.split('@')[0] || 'user',
+              full_name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || 'User',
+              avatar_url: userData.user.user_metadata?.avatar_url,
+              points: 0,
+              streak: 0,
+              onboarding_completed: false
+            }
+
+            const { data: createdProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert(newProfile)
+              .select()
+              .single()
+
+            if (createError) {
+              console.error('Error creating profile:', createError)
+              throw createError
+            }
+            
+            console.log('Profile created successfully:', createdProfile)
+            setProfile(createdProfile)
+          }
+        } else {
+          throw error
+        }
+      } else {
+        console.log('Profile fetched successfully:', data)
+        setProfile(data)
+      }
+    } catch (error) {
+      console.error('Error in fetchProfile:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id)
+    }
+  }
+
   useEffect(() => {
+    console.log('UserProvider: Initializing...')
+    
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error)
+        setLoading(false)
+        return
+      }
+      
+      console.log('Initial session:', session?.user?.id || 'No session')
       setUser(session?.user ?? null)
+      
       if (session?.user) {
         fetchProfile(session.user.id)
       } else {
@@ -41,8 +113,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id || 'No user')
+        
         setUser(session?.user ?? null)
+        
         if (session?.user) {
           await fetchProfile(session.user.id)
         } else {
@@ -52,48 +127,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     )
 
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        // If profile doesn't exist, create one
-        if (error.code === 'PGRST116') {
-          const { data: userData } = await supabase.auth.getUser()
-          if (userData.user) {
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert({
-                id: userData.user.id,
-                username: userData.user.email?.split('@')[0] || 'user',
-                full_name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || 'User',
-                avatar_url: userData.user.user_metadata?.avatar_url,
-              })
-              .select()
-              .single()
-
-            if (createError) throw createError
-            setProfile(newProfile)
-          }
-        } else {
-          throw error
-        }
-      } else {
-        setProfile(data)
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-    } finally {
-      setLoading(false)
+    return () => {
+      console.log('UserProvider: Cleaning up subscription')
+      subscription.unsubscribe()
     }
-  }
+  }, [])
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -144,7 +182,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     updateProfile,
+    refreshProfile,
   }
+
+  console.log('UserProvider state:', { 
+    hasUser: !!user, 
+    hasProfile: !!profile, 
+    loading, 
+    onboardingCompleted: profile?.onboarding_completed 
+  })
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
