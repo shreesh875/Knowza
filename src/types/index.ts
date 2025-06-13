@@ -1,13 +1,13 @@
 export interface User {
   id: string
   username: string
-  full_name: string
-  avatar_url?: string
+  full_name: string | null
+  avatar_url?: string | null
   points: number
   streak: number
-  last_activity: string
   created_at: string
   updated_at: string
+  onboarding_completed: boolean
 }
 
 export interface Interest {

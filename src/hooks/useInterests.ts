@@ -10,7 +10,7 @@ export const useInterests = () => {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { user } = useUser()
+  const { user, refreshProfile } = useUser()
   const navigate = useNavigate()
 
   // Dependency Inversion: Depends on abstraction (interestService) not concrete implementation
@@ -19,14 +19,18 @@ export const useInterests = () => {
     setError(null)
 
     try {
+      console.log('Loading interests...')
       const result = await interestService.getAllInterests()
       
       if (result.error) {
+        console.error('Error loading interests:', result.error)
         setError(result.error)
       } else {
+        console.log('Interests loaded:', result.interests.length)
         setInterests(result.interests)
       }
     } catch (error) {
+      console.error('Exception loading interests:', error)
       setError(error instanceof Error ? error.message : 'Failed to load interests')
     } finally {
       setLoading(false)
@@ -34,6 +38,7 @@ export const useInterests = () => {
   }, [])
 
   const toggleInterest = useCallback((interestId: string) => {
+    console.log('Toggling interest:', interestId)
     setSelectedInterests(prev => {
       if (prev.includes(interestId)) {
         return prev.filter(id => id !== interestId)
@@ -44,42 +49,58 @@ export const useInterests = () => {
   }, [])
 
   const saveInterests = useCallback(async () => {
-    if (!user || selectedInterests.length === 0) {
+    if (!user) {
+      setError('User not authenticated')
+      return { success: false }
+    }
+
+    if (selectedInterests.length === 0) {
       setError('Please select at least one interest')
       return { success: false }
     }
 
+    console.log('Saving interests:', selectedInterests)
     setSaving(true)
     setError(null)
 
     try {
       // Save user interests
+      console.log('Saving user interests...')
       const saveResult = await interestService.saveUserInterests(user.id, selectedInterests)
       
       if (saveResult.error) {
+        console.error('Error saving interests:', saveResult.error)
         setError(saveResult.error)
         return { success: false }
       }
 
       // Mark onboarding as completed
+      console.log('Completing onboarding...')
       const onboardingResult = await interestService.completeOnboarding(user.id)
       
       if (onboardingResult.error) {
+        console.error('Error completing onboarding:', onboardingResult.error)
         setError(onboardingResult.error)
         return { success: false }
       }
+
+      console.log('Onboarding completed successfully')
+      
+      // Refresh the user profile to get updated onboarding status
+      await refreshProfile()
 
       // Navigate to home page
       navigate('/')
       return { success: true }
     } catch (error) {
+      console.error('Exception saving interests:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to save interests'
       setError(errorMessage)
       return { success: false }
     } finally {
       setSaving(false)
     }
-  }, [user, selectedInterests, navigate])
+  }, [user, selectedInterests, navigate, refreshProfile])
 
   const clearError = useCallback(() => {
     setError(null)
