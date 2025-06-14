@@ -47,7 +47,7 @@ export const FeedPost: React.FC<FeedPostProps> = ({ post }) => {
           .select('id')
           .eq('post_id', post.id)
           .eq('user_id', user.id)
-          .single()
+          .maybeSingle()
 
         if (data && !error) {
           setIsLiked(true)
