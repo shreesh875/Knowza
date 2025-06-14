@@ -30,6 +30,6 @@ export const MobileNav: React.FC = () => {
           </NavLink>
         ))}
       </div>
-    </div>
+    </nav>
   )
 }
