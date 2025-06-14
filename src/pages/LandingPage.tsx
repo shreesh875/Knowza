@@ -341,7 +341,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Apple-Style Video Carousel */}
+      {/* Apple-Style Video Carousel - Smaller with Peek */}
       <div id="features" className="relative z-10 py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -350,10 +350,46 @@ export const LandingPage: React.FC = () => {
             </h2>
           </div>
 
-          {/* Video Carousel Container */}
-          <div className="relative">
-            {/* Main Video Display */}
-            <div className="relative h-[600px] bg-black rounded-3xl overflow-hidden shadow-2xl">
+          {/* Video Carousel Container - Smaller with Peek Effect */}
+          <div className="relative flex items-center justify-center">
+            {/* Left Peek Panel */}
+            <div className="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="w-32 h-80 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+                <div 
+                  className="w-full h-full bg-cover bg-center opacity-60"
+                  style={{ 
+                    backgroundImage: `url(${videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].posterUrl})` 
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-white text-xs font-medium truncate">
+                    {videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].title}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Peek Panel */}
+            <div className="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="w-32 h-80 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+                <div 
+                  className="w-full h-full bg-cover bg-center opacity-60"
+                  style={{ 
+                    backgroundImage: `url(${videoSlides[(currentSlide + 1) % videoSlides.length].posterUrl})` 
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/60" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-white text-xs font-medium truncate">
+                    {videoSlides[(currentSlide + 1) % videoSlides.length].title}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Video Display - Smaller */}
+            <div className="relative h-[480px] w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl mx-auto">
               {/* Video Content */}
               <div className="relative w-full h-full">
                 {videoSlides.map((slide, index) => (
@@ -382,15 +418,15 @@ export const LandingPage: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     
                     {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-12">
-                      <div className="max-w-2xl">
-                        <h3 className="text-5xl font-bold mb-4 text-white">
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <div className="max-w-xl">
+                        <h3 className="text-3xl font-bold mb-3 text-white">
                           {slide.title}
                         </h3>
-                        <p className="text-2xl text-white/80 mb-6 font-medium">
+                        <p className="text-xl text-white/80 mb-4 font-medium">
                           {slide.subtitle}
                         </p>
-                        <p className="text-lg text-white/70 leading-relaxed">
+                        <p className="text-sm text-white/70 leading-relaxed">
                           {slide.description}
                         </p>
                       </div>
@@ -399,12 +435,12 @@ export const LandingPage: React.FC = () => {
                     {/* Play/Pause Button */}
                     <button
                       onClick={togglePlayPause}
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 hover:scale-110"
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 hover:scale-110"
                     >
                       {isPlaying ? (
-                        <Pause className="w-8 h-8 text-white ml-0" />
+                        <Pause className="w-6 h-6 text-white ml-0" />
                       ) : (
-                        <Play className="w-8 h-8 text-white ml-1" />
+                        <Play className="w-6 h-6 text-white ml-1" />
                       )}
                     </button>
                   </div>
@@ -414,46 +450,46 @@ export const LandingPage: React.FC = () => {
               {/* Navigation Arrows */}
               <button
                 onClick={prevSlide}
-                className="absolute left-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110"
               >
-                <ChevronLeft className="w-6 h-6 text-white" />
+                <ChevronLeft className="w-5 h-5 text-white" />
               </button>
               
               <button
                 onClick={nextSlide}
-                className="absolute right-6 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110"
               >
-                <ChevronRight className="w-6 h-6 text-white" />
+                <ChevronRight className="w-5 h-5 text-white" />
               </button>
             </div>
+          </div>
 
-            {/* Dot Navigation */}
-            <div className="flex justify-center mt-8 space-x-3">
-              {videoSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentSlide
-                      ? 'bg-white scale-125'
-                      : 'bg-white/40 hover:bg-white/60'
-                  }`}
-                />
-              ))}
+          {/* Dot Navigation */}
+          <div className="flex justify-center mt-8 space-x-3">
+            {videoSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? 'bg-white scale-125'
+                    : 'bg-white/40 hover:bg-white/60'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mt-6 max-w-md mx-auto">
+            <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#4AB0F3] to-[#B983FF] transition-all duration-700 ease-out"
+                style={{ width: `${((currentSlide + 1) / videoSlides.length) * 100}%` }}
+              />
             </div>
-
-            {/* Progress Bar */}
-            <div className="mt-6 max-w-md mx-auto">
-              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-[#4AB0F3] to-[#B983FF] transition-all duration-700 ease-out"
-                  style={{ width: `${((currentSlide + 1) / videoSlides.length) * 100}%` }}
-                />
-              </div>
-              <div className="flex justify-between mt-2 text-sm text-white/60">
-                <span>{currentSlide + 1} of {videoSlides.length}</span>
-                <span>Features</span>
-              </div>
+            <div className="flex justify-between mt-2 text-sm text-white/60">
+              <span>{currentSlide + 1} of {videoSlides.length}</span>
+              <span>Features</span>
             </div>
           </div>
         </div>
