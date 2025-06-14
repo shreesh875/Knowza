@@ -25,60 +25,161 @@ export const useUser = () => {
 }
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Temporarily disabled authentication - set demo user
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [profile, setProfile] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false) // Set to false since we're not loading anything
+  const [loading, setLoading] = useState(true)
 
   const fetchProfile = async (userId: string) => {
-    // Temporarily disabled - return demo profile
-    console.log('Profile fetching disabled for demo')
-    return
+    try {
+      console.log('Fetching profile for user:', userId)
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) {
+        console.error('Error fetching profile:', error)
+        return
+      }
+
+      console.log('Profile fetched successfully:', data)
+      setProfile(data)
+    } catch (error) {
+      console.error('Exception fetching profile:', error)
+    }
   }
 
   const refreshProfile = async () => {
-    // Temporarily disabled
-    console.log('Profile refresh disabled for demo')
-    return
+    if (user) {
+      await fetchProfile(user.id)
+    }
   }
 
   useEffect(() => {
-    console.log('UserProvider: Authentication disabled for demo')
-    setLoading(false)
+    console.log('UserProvider: Initializing authentication')
     
-    // Set demo user and profile
-    setUser(null) // No real user for demo
-    setProfile({
-      id: 'demo-user-id',
-      username: 'demouser',
-      full_name: 'Demo User',
-      avatar_url: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150',
-      points: 120,
-      streak: 3,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      onboarding_completed: true
-    })
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Error getting session:', error)
+        } else if (session?.user) {
+          console.log('Initial session found:', session.user.id)
+          setUser(session.user)
+          await fetchProfile(session.user.id)
+        } else {
+          console.log('No initial session found')
+        }
+      } catch (error) {
+        console.error('Exception getting initial session:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getInitialSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
+        
+        if (session?.user) {
+          setUser(session.user)
+          await fetchProfile(session.user.id)
+        } else {
+          setUser(null)
+          setProfile(null)
+        }
+        
+        setLoading(false)
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    console.log('Sign in disabled for demo')
-    throw new Error('Authentication disabled for demo')
+    console.log('Signing in user:', email)
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      console.error('Sign in error:', error)
+      throw error
+    }
+
+    console.log('Sign in successful:', data.user?.id)
   }
 
   const signUp = async (email: string, password: string, fullName: string, username: string) => {
-    console.log('Sign up disabled for demo')
-    throw new Error('Authentication disabled for demo')
+    console.log('Signing up user:', email, username)
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          username: username,
+        },
+      },
+    })
+
+    if (error) {
+      console.error('Sign up error:', error)
+      throw error
+    }
+
+    console.log('Sign up successful:', data.user?.id)
   }
 
   const signOut = async () => {
-    console.log('Sign out disabled for demo')
-    // Don't actually sign out in demo mode
+    console.log('Signing out user')
+    
+    const { error } = await supabase.auth.signOut()
+    
+    if (error) {
+      console.error('Sign out error:', error)
+      throw error
+    }
+
+    console.log('Sign out successful')
   }
 
   const updateProfile = async (updates: Partial<User>) => {
-    console.log('Profile update disabled for demo')
-    // Don't actually update in demo mode
+    if (!user) {
+      throw new Error('No user logged in')
+    }
+
+    console.log('Updating profile:', updates)
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Update profile error:', error)
+      throw error
+    }
+
+    console.log('Profile updated successfully:', data)
+    setProfile(data)
   }
 
   const value = {
@@ -92,7 +193,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfile,
   }
 
-  console.log('UserProvider state (demo mode):', { 
+  console.log('UserProvider state:', { 
     hasUser: !!user, 
     hasProfile: !!profile, 
     loading, 

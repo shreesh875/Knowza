@@ -3,10 +3,12 @@ import { Edit, Trophy, Target, Calendar } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/Card'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
+import { useUser } from '../contexts/UserContext'
 
 const interests = ['Artificial Intelligence', 'Machine Learning', 'Data Science']
 
 export const Profile: React.FC = () => {
+  const { profile } = useUser()
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'achievements'>('posts')
 
   const tabs = [
@@ -14,6 +16,17 @@ export const Profile: React.FC = () => {
     { id: 'saved', label: 'Saved' },
     { id: 'achievements', label: 'Achievements' },
   ]
+
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-neutral-600 dark:text-neutral-400">Loading profile...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -23,16 +36,19 @@ export const Profile: React.FC = () => {
         <CardContent className="relative px-6 pb-6">
           <div className="flex items-end gap-4 -mt-16">
             <Avatar
-              src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150"
-              alt="Demo User"
+              src={profile.avatar_url}
+              alt={profile.full_name || profile.username}
               size="xl"
+              fallback={profile.full_name || profile.username}
               className="border-4 border-white dark:border-neutral-800"
             />
             <div className="flex-1 pb-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Demo User</h1>
-                  <p className="text-neutral-600 dark:text-neutral-400">@demouser</p>
+                  <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+                    {profile.full_name || profile.username}
+                  </h1>
+                  <p className="text-neutral-600 dark:text-neutral-400">@{profile.username}</p>
                 </div>
                 <Button variant="outline" size="sm">
                   <Edit className="w-4 h-4 mr-2" />
@@ -46,11 +62,11 @@ export const Profile: React.FC = () => {
           <div className="flex items-center gap-6 mt-4">
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-yellow-500" />
-              <span className="font-semibold text-neutral-900 dark:text-white">120 points</span>
+              <span className="font-semibold text-neutral-900 dark:text-white">{profile.points} points</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1 bg-success-100 text-success-700 rounded-full text-sm font-medium dark:bg-success-900/20 dark:text-success-400">
               <Target className="w-4 h-4" />
-              <span>3 day streak</span>
+              <span>{profile.streak} day streak</span>
             </div>
           </div>
 
