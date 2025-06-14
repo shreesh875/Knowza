@@ -111,6 +111,10 @@ export default {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'gradient-x': 'gradient-x 3s ease infinite',
+        'twinkle': 'twinkle 3s ease-in-out infinite',
+        'shooting-star': 'shooting-star 1.5s ease-out forwards',
+        'draw-line': 'draw-line 12s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -120,6 +124,58 @@ export default {
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'gradient-x': {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center'
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center'
+          },
+        },
+        'twinkle': {
+          '0%, 100%': { 
+            opacity: '0.3',
+            transform: 'scale(1)'
+          },
+          '50%': { 
+            opacity: '1',
+            transform: 'scale(1.2)'
+          },
+        },
+        'shooting-star': {
+          '0%': {
+            transform: 'translate(0, 0) scale(0)',
+            opacity: '1'
+          },
+          '10%': {
+            transform: 'translate(0, 0) scale(1)',
+            opacity: '1'
+          },
+          '90%': {
+            transform: 'translate(var(--end-x), var(--end-y)) scale(1)',
+            opacity: '1'
+          },
+          '100%': {
+            transform: 'translate(var(--end-x), var(--end-y)) scale(0)',
+            opacity: '0'
+          }
+        },
+        'draw-line': {
+          '0%': {
+            'stroke-dasharray': '0 1000',
+            'stroke-dashoffset': '0'
+          },
+          '50%': {
+            'stroke-dasharray': '1000 1000',
+            'stroke-dashoffset': '0'
+          },
+          '100%': {
+            'stroke-dasharray': '0 1000',
+            'stroke-dashoffset': '-1000'
+          }
         },
       },
     },

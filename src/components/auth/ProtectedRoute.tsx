@@ -53,9 +53,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       console.log('Redirecting to onboarding: not completed')
       return <Navigate to="/onboarding/interests" replace />
     }
-    // Otherwise redirect to home
-    console.log('Redirecting to home: onboarding completed')
-    return <Navigate to="/" replace />
+    // Otherwise redirect to main app
+    console.log('Redirecting to app: onboarding completed')
+    return <Navigate to="/app" replace />
   }
 
   // If user is authenticated and onboarding is required
@@ -80,8 +80,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     
     // If user has completed onboarding but is trying to access onboarding page
     if (profile.onboarding_completed && location.pathname === '/onboarding/interests') {
-      console.log('Redirecting to home: onboarding already completed')
-      return <Navigate to="/" replace />
+      console.log('Redirecting to app: onboarding already completed')
+      return <Navigate to="/app" replace />
     }
   }
 
@@ -99,10 +99,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       )
     }
 
-    // If user has already completed onboarding, redirect to home
+    // If user has already completed onboarding, redirect to main app
     if (profile.onboarding_completed && location.pathname === '/onboarding/interests') {
-      console.log('Redirecting to home: onboarding already completed')
-      return <Navigate to="/" replace />
+      console.log('Redirecting to app: onboarding already completed')
+      return <Navigate to="/app" replace />
     }
   }
 

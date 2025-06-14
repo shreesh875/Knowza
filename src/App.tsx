@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { UserProvider } from './contexts/UserContext'
 import { Layout } from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { LandingPage } from './pages/LandingPage'
 import { Home } from './pages/Home'
 import { PostDetail } from './pages/PostDetail'
 import { Leaderboard } from './pages/Leaderboard'
@@ -19,6 +20,9 @@ function App() {
         <Router>
           <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
             <Routes>
+              {/* Landing page - public route */}
+              <Route path="/" element={<LandingPage />} />
+              
               {/* Authentication routes */}
               <Route 
                 path="/signin" 
@@ -48,7 +52,7 @@ function App() {
               />
               
               {/* Main application routes - require authentication */}
-              <Route path="/" element={
+              <Route path="/app" element={
                 <ProtectedRoute requireAuth={true} requireOnboarding={true}>
                   <Layout />
                 </ProtectedRoute>

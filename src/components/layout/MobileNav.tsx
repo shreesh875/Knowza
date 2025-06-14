@@ -3,10 +3,10 @@ import { NavLink } from 'react-router-dom'
 import { Home, Bot, BarChart3, User } from 'lucide-react'
 
 const navigation = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'BrainMate', href: '/brainmate', icon: Bot },
-  { name: 'Leaderboard', href: '/leaderboard', icon: BarChart3 },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Home', href: '/app', icon: Home },
+  { name: 'BrainMate', href: '/app/brainmate', icon: Bot },
+  { name: 'Leaderboard', href: '/app/leaderboard', icon: BarChart3 },
+  { name: 'Profile', href: '/app/profile', icon: User },
 ]
 
 export const MobileNav: React.FC = () => {
@@ -30,6 +30,6 @@ export const MobileNav: React.FC = () => {
           </NavLink>
         ))}
       </div>
-    </nav>
+    </div>
   )
 }

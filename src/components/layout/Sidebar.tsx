@@ -6,10 +6,10 @@ import { useUser } from '../../contexts/UserContext'
 import { Avatar } from '../ui/Avatar'
 
 const navigation = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'BrainMate', href: '/brainmate', icon: Bot },
-  { name: 'Leaderboard', href: '/leaderboard', icon: BarChart3 },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Home', href: '/app', icon: Home },
+  { name: 'BrainMate', href: '/app/brainmate', icon: Bot },
+  { name: 'Leaderboard', href: '/app/leaderboard', icon: BarChart3 },
+  { name: 'Profile', href: '/app/profile', icon: User },
 ]
 
 export const Sidebar: React.FC = () => {
