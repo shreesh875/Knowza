@@ -333,7 +333,7 @@ export const PostDetail: React.FC = () => {
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (data && !error) {
         setIsLiked(true)
