@@ -175,7 +175,7 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
             avatar_url
           )
         `)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
 
