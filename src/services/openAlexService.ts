@@ -26,7 +26,7 @@ interface OpenAlexWork {
 }
 
 interface OpenAlexResponse {
-  papers: OpenAlexWork[]
+  papers: FeedPost[]
   total: number
   page: number
   per_page: number
@@ -63,15 +63,18 @@ interface FeedPost {
   id: string
   title: string
   description: string
-  content_type: 'paper' | 'video' | 'article'
-  content_url: string
-  thumbnail_url: string | null
   author: string
-  published_at: string
+  authorAvatar: string
+  timeAgo: string
+  contentType: 'paper' | 'video' | 'article'
+  thumbnail: string
+  likes: number
+  comments: number
   tags: string[]
-  likes_count: number
-  comments_count: number
-  created_at: string
+  source?: 'openalex' | 'semantic_scholar'
+  citationCount?: number
+  year?: number
+  url?: string
 }
 
 class OpenAlexService {
@@ -80,6 +83,74 @@ class OpenAlexService {
   constructor() {
     // Use the Supabase edge function endpoint
     this.baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/openalex-api`
+  }
+
+  // Generate high-quality research paper thumbnails
+  private generatePaperThumbnail(workId: string, concepts: string[] = []): string {
+    const researchThumbnails = [
+      // Science and Technology
+      'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=800',
+      
+      // AI and Machine Learning themed
+      'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800',
+      
+      // Laboratory and Research
+      'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1366919/pexels-photo-1366919.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1366942/pexels-photo-1366942.jpeg?auto=compress&cs=tinysrgb&w=800',
+      
+      // Data and Analytics
+      'https://images.pexels.com/photos/590020/pexels-photo-590020.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/669610/pexels-photo-669610.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/590016/pexels-photo-590016.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ]
+    
+    // Use work ID to consistently select the same thumbnail
+    const index = workId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % researchThumbnails.length
+    return researchThumbnails[index]
+  }
+
+  // Generate author avatars
+  private generateAuthorAvatar(authorName: string): string {
+    const avatars = [
+      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1300402/pexels-photo-1300402.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=150',
+      'https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg?auto=compress&cs=tinysrgb&w=150'
+    ]
+    
+    // Use author name to consistently select the same avatar
+    const index = authorName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % avatars.length
+    return avatars[index]
+  }
+
+  // Format time ago
+  private formatTimeAgo(year: number): string {
+    const currentYear = new Date().getFullYear()
+    const yearsAgo = currentYear - year
+    
+    if (yearsAgo === 0) return 'This year'
+    if (yearsAgo === 1) return '1 year ago'
+    if (yearsAgo <= 5) return `${yearsAgo} years ago`
+    return `${year}`
   }
 
   async searchWorks(
@@ -116,8 +187,18 @@ class OpenAlexService {
       const data: OpenAlexResponse = await response.json()
       console.log('OpenAlex works fetched successfully:', data.papers?.length || 0)
 
+      // Transform the papers to ensure proper image URLs
+      const transformedPapers = data.papers?.map(paper => ({
+        ...paper,
+        thumbnail: this.generatePaperThumbnail(paper.id, paper.tags),
+        authorAvatar: this.generateAuthorAvatar(paper.author),
+        timeAgo: paper.year ? this.formatTimeAgo(paper.year) : 'Unknown',
+        contentType: 'paper' as const,
+        source: 'openalex' as const
+      })) || []
+
       return {
-        papers: data.papers || [],
+        papers: transformedPapers,
         total: data.total || 0,
         page: data.page || 1,
         per_page: data.per_page || 10
@@ -151,7 +232,18 @@ class OpenAlexService {
       const data = await response.json()
       console.log('OpenAlex work fetched successfully:', data.paper ? 'Found' : 'Not found')
 
-      return data.paper || null
+      if (data.paper) {
+        return {
+          ...data.paper,
+          thumbnail: this.generatePaperThumbnail(data.paper.id, data.paper.tags),
+          authorAvatar: this.generateAuthorAvatar(data.paper.author),
+          timeAgo: data.paper.year ? this.formatTimeAgo(data.paper.year) : 'Unknown',
+          contentType: 'paper' as const,
+          source: 'openalex' as const
+        }
+      }
+
+      return null
     } catch (error) {
       console.error('Error fetching OpenAlex work by ID:', error)
       throw new Error(`Failed to fetch paper: ${error instanceof Error ? error.message : 'Unknown error'}`)
