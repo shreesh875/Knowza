@@ -169,29 +169,29 @@ export const LandingPage: React.FC = () => {
 
       {/* Navigation */}
       <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white/10 backdrop-blur-xl rounded-full px-8 py-4 border border-white/20">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3 group cursor-pointer">
+        <div className="bg-white/10 backdrop-blur-xl rounded-full px-12 py-4 border border-white/20 min-w-[800px]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 group cursor-pointer">
               <img 
                 src="/Knowza Symbol.png" 
                 alt="Knowza" 
                 className="w-8 h-8 transition-transform duration-300 group-hover:rotate-180"
               />
-              <span className="text-white font-bold text-lg transition-all duration-300 group-hover:text-[#4AB0F3]">
+              <span className="text-white font-bold text-xl transition-all duration-300 group-hover:text-[#4AB0F3]">
                 Knowza
               </span>
             </div>
             
-            <div className="flex items-center space-x-6">
-              <a href="#features" className="text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-full transition-all duration-200">
+            <div className="flex items-center space-x-10">
+              <a href="#features" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-full transition-all duration-200 text-lg">
                 Features
               </a>
-              <a href="#about" className="text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-full transition-all duration-200">
+              <a href="#about" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-full transition-all duration-200 text-lg">
                 About
               </a>
               <button 
                 onClick={handleSignIn}
-                className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-200"
+                className="text-white/80 hover:text-white hover:bg-white/10 px-8 py-3 rounded-full transition-all duration-200 text-lg font-medium"
               >
                 Log in
               </button>
