@@ -21,6 +21,7 @@ export const LandingPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isNavHovered, setIsNavHovered] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | 'direct'>('next')
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const videoSlides: VideoSlide[] = [
@@ -121,36 +122,39 @@ export const LandingPage: React.FC = () => {
     if (isTransitioning) return
     
     setIsTransitioning(true)
+    setSlideDirection('next')
     setCurrentSlide(prev => (prev + 1) % videoSlides.length)
     
     // Reset transition state after animation completes
     setTimeout(() => {
       setIsTransitioning(false)
-    }, 800)
+    }, 1000)
   }
 
   const prevSlide = () => {
     if (isTransitioning) return
     
     setIsTransitioning(true)
+    setSlideDirection('prev')
     setCurrentSlide(prev => (prev - 1 + videoSlides.length) % videoSlides.length)
     
     // Reset transition state after animation completes
     setTimeout(() => {
       setIsTransitioning(false)
-    }, 800)
+    }, 1000)
   }
 
   const goToSlide = (index: number) => {
     if (isTransitioning || index === currentSlide) return
     
     setIsTransitioning(true)
+    setSlideDirection('direct')
     setCurrentSlide(index)
     
     // Reset transition state after animation completes
     setTimeout(() => {
       setIsTransitioning(false)
-    }, 800)
+    }, 1000)
   }
 
   const togglePlayPause = () => {
@@ -171,6 +175,30 @@ export const LandingPage: React.FC = () => {
 
   const handleSignIn = () => {
     navigate('/signin')
+  }
+
+  // Get slide transform based on position and direction
+  const getSlideTransform = (index: number) => {
+    if (index === currentSlide) {
+      return 'opacity-100 scale-100 translate-x-0 blur-0'
+    }
+    
+    if (slideDirection === 'next') {
+      if (index === (currentSlide - 1 + videoSlides.length) % videoSlides.length) {
+        return 'opacity-0 scale-90 -translate-x-full blur-sm'
+      } else if (index === (currentSlide + 1) % videoSlides.length) {
+        return 'opacity-0 scale-90 translate-x-full blur-sm'
+      }
+    } else if (slideDirection === 'prev') {
+      if (index === (currentSlide + 1) % videoSlides.length) {
+        return 'opacity-0 scale-90 translate-x-full blur-sm'
+      } else if (index === (currentSlide - 1 + videoSlides.length) % videoSlides.length) {
+        return 'opacity-0 scale-90 -translate-x-full blur-sm'
+      }
+    }
+    
+    // For direct navigation or other slides
+    return 'opacity-0 scale-85 translate-x-0 blur-md'
   }
 
   if (loading) {
@@ -284,16 +312,16 @@ export const LandingPage: React.FC = () => {
           <div className="relative flex items-center justify-center">
             {/* Left Peek Panel */}
             <div className="hidden lg:block absolute left-8 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden transition-all duration-800 ease-out">
+              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                 <div 
-                  className="w-full h-full bg-cover bg-center opacity-60 transition-all duration-800 ease-out"
+                  className="w-full h-full bg-cover bg-center opacity-60 transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] transform hover:scale-105"
                   style={{ 
                     backgroundImage: `url(${videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].posterUrl})` 
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
                 <div className="absolute bottom-4 left-3 right-3">
-                  <p className="text-white text-xs font-medium truncate transition-all duration-800 ease-out">
+                  <p className="text-white text-xs font-medium truncate transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                     {videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].title}
                   </p>
                 </div>
@@ -302,16 +330,16 @@ export const LandingPage: React.FC = () => {
 
             {/* Right Peek Panel */}
             <div className="hidden lg:block absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden transition-all duration-800 ease-out">
+              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                 <div 
-                  className="w-full h-full bg-cover bg-center opacity-60 transition-all duration-800 ease-out"
+                  className="w-full h-full bg-cover bg-center opacity-60 transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] transform hover:scale-105"
                   style={{ 
                     backgroundImage: `url(${videoSlides[(currentSlide + 1) % videoSlides.length].posterUrl})` 
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/60" />
                 <div className="absolute bottom-4 left-3 right-3">
-                  <p className="text-white text-xs font-medium truncate transition-all duration-800 ease-out">
+                  <p className="text-white text-xs font-medium truncate transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                     {videoSlides[(currentSlide + 1) % videoSlides.length].title}
                   </p>
                 </div>
@@ -325,17 +353,15 @@ export const LandingPage: React.FC = () => {
                 {videoSlides.map((slide, index) => (
                   <div
                     key={slide.id}
-                    className={`absolute inset-0 transition-all duration-800 ease-out ${
-                      index === currentSlide 
-                        ? 'opacity-100 scale-100 translate-x-0' 
-                        : index < currentSlide
-                        ? 'opacity-0 scale-95 -translate-x-full'
-                        : 'opacity-0 scale-95 translate-x-full'
-                    }`}
+                    className={`absolute inset-0 transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${getSlideTransform(index)}`}
+                    style={{
+                      transformOrigin: 'center center',
+                      willChange: 'transform, opacity, filter'
+                    }}
                   >
                     <video
                       ref={el => videoRefs.current[index] = el}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
                       poster={slide.posterUrl}
                       muted
                       loop
@@ -347,18 +373,18 @@ export const LandingPage: React.FC = () => {
                     </video>
                     
                     {/* Video Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]" />
                     
                     {/* Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-8">
-                      <div className="max-w-xl transform transition-all duration-800 ease-out">
-                        <h3 className="text-3xl font-bold mb-3 text-white">
+                      <div className="max-w-xl transform transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] translate-y-0 opacity-100">
+                        <h3 className="text-3xl font-bold mb-3 text-white transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                           {slide.title}
                         </h3>
-                        <p className="text-xl text-white/80 mb-4 font-medium">
+                        <p className="text-xl text-white/80 mb-4 font-medium transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                           {slide.subtitle}
                         </p>
-                        <p className="text-sm text-white/70 leading-relaxed">
+                        <p className="text-sm text-white/70 leading-relaxed transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
                           {slide.description}
                         </p>
                       </div>
@@ -367,7 +393,7 @@ export const LandingPage: React.FC = () => {
                     {/* Play/Pause Button */}
                     <button
                       onClick={togglePlayPause}
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 hover:scale-110"
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-110 active:scale-95"
                     >
                       {isPlaying ? (
                         <Pause className="w-6 h-6 text-white ml-0" />
@@ -383,7 +409,7 @@ export const LandingPage: React.FC = () => {
               <button
                 onClick={prevSlide}
                 disabled={isTransitioning}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-white/10"
               >
                 <ChevronLeft className="w-6 h-6 text-white" />
               </button>
@@ -391,7 +417,7 @@ export const LandingPage: React.FC = () => {
               <button
                 onClick={nextSlide}
                 disabled={isTransitioning}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-white/10"
               >
                 <ChevronRight className="w-6 h-6 text-white" />
               </button>
@@ -405,10 +431,10 @@ export const LandingPage: React.FC = () => {
                 key={index}
                 onClick={() => goToSlide(index)}
                 disabled={isTransitioning}
-                className={`w-3 h-3 rounded-full transition-all duration-300 disabled:cursor-not-allowed ${
+                className={`w-3 h-3 rounded-full transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] disabled:cursor-not-allowed hover:scale-125 active:scale-110 ${
                   index === currentSlide
-                    ? 'bg-white scale-125'
-                    : 'bg-white/40 hover:bg-white/60'
+                    ? 'bg-white scale-125 shadow-lg shadow-white/30'
+                    : 'bg-white/40 hover:bg-white/60 scale-100'
                 }`}
               />
             ))}
