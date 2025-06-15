@@ -17,7 +17,6 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate()
   const { user, profile, loading } = useUser()
   const [stars, setStars] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([])
-  const [shootingStars, setShootingStars] = useState<Array<{ id: number; startX: number; startY: number; endX: number; endY: number; delay: number }>>([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isNavHovered, setIsNavHovered] = useState(false)
@@ -98,64 +97,6 @@ export const LandingPage: React.FC = () => {
     }
 
     generateStars()
-  }, [])
-
-  // Generate shooting stars periodically
-  useEffect(() => {
-    const generateShootingStar = () => {
-      const side = Math.floor(Math.random() * 4)
-      let startX, startY, endX, endY
-
-      switch (side) {
-        case 0: // top
-          startX = Math.random() * 100
-          startY = -5
-          endX = Math.random() * 100
-          endY = 105
-          break
-        case 1: // right
-          startX = 105
-          startY = Math.random() * 100
-          endX = -5
-          endY = Math.random() * 100
-          break
-        case 2: // bottom
-          startX = Math.random() * 100
-          startY = 105
-          endX = Math.random() * 100
-          endY = -5
-          break
-        case 3: // left
-          startX = -5
-          startY = Math.random() * 100
-          endX = 105
-          endY = Math.random() * 100
-          break
-        default:
-          startX = startY = endX = endY = 0
-      }
-
-      const newShootingStar = {
-        id: Date.now(),
-        startX,
-        startY,
-        endX,
-        endY,
-        delay: 0
-      }
-
-      setShootingStars(prev => [...prev, newShootingStar])
-
-      setTimeout(() => {
-        setShootingStars(prev => prev.filter(star => star.id !== newShootingStar.id))
-      }, 2200)
-    }
-
-    const interval = setInterval(() => {
-      generateShootingStar()
-    }, Math.random() * 25000 + 20000)
-
-    return () => clearInterval(interval)
   }, [])
 
   // Auto-advance slides
@@ -243,40 +184,6 @@ export const LandingPage: React.FC = () => {
             }}
           />
         ))}
-
-        {/* Shooting Stars */}
-        {shootingStars.map((star) => (
-          <div
-            key={star.id}
-            className="absolute w-1 h-1 bg-gradient-to-r from-white to-blue-400 rounded-full animate-shooting-star"
-            style={{
-              left: `${star.startX}%`,
-              top: `${star.startY}%`,
-              '--end-x': `${star.endX - star.startX}vw`,
-              '--end-y': `${star.endY - star.startY}vh`,
-            } as React.CSSProperties}
-          />
-        ))}
-
-        {/* Constellation Lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-20">
-          <path
-            d="M100,200 Q200,100 300,200 T500,200"
-            stroke="white"
-            strokeWidth="1"
-            fill="none"
-            className="animate-draw-line"
-            style={{ animationDelay: '2s' }}
-          />
-          <path
-            d="M600,300 L700,250 L750,350 L650,400 Z"
-            stroke="white"
-            strokeWidth="1"
-            fill="none"
-            className="animate-draw-line"
-            style={{ animationDelay: '4s' }}
-          />
-        </svg>
       </div>
 
       {/* Navigation */}
@@ -331,11 +238,11 @@ export const LandingPage: React.FC = () => {
       {/* Hero Section */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-6xl mx-auto">
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
-            <div className="bg-gradient-to-r from-gray-400/50 to-white/50 bg-clip-text text-transparent mb-6 pb-2">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-none">
+            <div className="bg-gradient-to-r from-gray-400/50 to-white/50 bg-clip-text text-transparent mb-6 pb-4 animate-gradient-x bg-[length:200%_200%] overflow-visible" style={{ lineHeight: '1.1' }}>
               The AI Learning
             </div>
-            <div className="bg-gradient-to-r from-[#4AB0F3] via-[#B983FF] to-[#A4F34A] bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%] pb-2">
+            <div className="bg-gradient-to-r from-[#4AB0F3] via-[#B983FF] to-[#A4F34A] bg-clip-text text-transparent animate-gradient-x bg-[length:200%_200%] pb-4 overflow-visible" style={{ lineHeight: '1.1' }}>
               Revolution
             </div>
           </h1>
@@ -351,27 +258,17 @@ export const LandingPage: React.FC = () => {
           >
             Join for free
           </button>
-          
-          <p className="text-white/40 mt-6 text-sm">
-            Currently in development • Coming to iOS & Android
-          </p>
         </div>
       </div>
 
-      {/* Apple-Style Video Carousel - Smaller with Peek */}
+      {/* Apple-Style Video Carousel */}
       <div id="features" className="relative z-10 py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">
-              Discover how Knowza transforms learning into an engaging, social experience
-            </h2>
-          </div>
-
-          {/* Video Carousel Container - Smaller with Peek Effect */}
+          {/* Video Carousel Container */}
           <div className="relative flex items-center justify-center">
             {/* Left Peek Panel */}
-            <div className="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-24 h-64 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+            <div className="hidden lg:block absolute left-8 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
                 <div 
                   className="w-full h-full bg-cover bg-center opacity-60"
                   style={{ 
@@ -379,7 +276,7 @@ export const LandingPage: React.FC = () => {
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
-                <div className="absolute bottom-4 left-2 right-2">
+                <div className="absolute bottom-4 left-3 right-3">
                   <p className="text-white text-xs font-medium truncate">
                     {videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].title}
                   </p>
@@ -388,8 +285,8 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Right Peek Panel */}
-            <div className="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-24 h-64 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+            <div className="hidden lg:block absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
                 <div 
                   className="w-full h-full bg-cover bg-center opacity-60"
                   style={{ 
@@ -397,7 +294,7 @@ export const LandingPage: React.FC = () => {
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/60" />
-                <div className="absolute bottom-4 left-2 right-2">
+                <div className="absolute bottom-4 left-3 right-3">
                   <p className="text-white text-xs font-medium truncate">
                     {videoSlides[(currentSlide + 1) % videoSlides.length].title}
                   </p>
@@ -405,8 +302,8 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Main Video Display - Smaller */}
-            <div className="relative h-[400px] w-full max-w-3xl bg-black rounded-3xl overflow-hidden shadow-2xl mx-auto">
+            {/* Main Video Display */}
+            <div className="relative h-[500px] w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl mx-auto">
               {/* Video Content */}
               <div className="relative w-full h-full">
                 {videoSlides.map((slide, index) => (
@@ -494,20 +391,6 @@ export const LandingPage: React.FC = () => {
                 }`}
               />
             ))}
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-6 max-w-md mx-auto">
-            <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-[#4AB0F3] to-[#B983FF] transition-all duration-700 ease-out"
-                style={{ width: `${((currentSlide + 1) / videoSlides.length) * 100}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-2 text-sm text-white/60">
-              <span>{currentSlide + 1} of {videoSlides.length}</span>
-              <span>Features</span>
-            </div>
           </div>
         </div>
       </div>
