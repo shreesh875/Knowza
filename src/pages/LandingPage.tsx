@@ -322,7 +322,7 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Apple-Style Video Carousel */}
-      <div id="features" className="relative z-10 py-20 px-4">
+      <div id="features" className="relative z-10 py-32 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Video Carousel Container */}
           <div className="relative flex items-center justify-center">
@@ -465,8 +465,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Spacer Section */}
+      <div className="relative z-10 py-24">
+        <div className="max-w-6xl mx-auto px-4">
+          {/* Optional: Add subtle decorative elements */}
+          <div className="flex justify-center items-center space-x-8 opacity-20">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            <div className="w-3 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+          </div>
+        </div>
+      </div>
+
       {/* Empty Video Panel Section */}
-      <div id="video" className="relative z-10 py-20 px-4">
+      <div id="video" className="relative z-10 py-32 px-4">
         <div className="max-w-6xl mx-auto">
           {/* Empty Video Container */}
           <div className="relative w-full h-[600px] bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
