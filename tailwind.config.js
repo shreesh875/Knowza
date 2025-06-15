@@ -107,6 +107,9 @@ export default {
         '18': '4.5rem',
         '88': '22rem',
       },
+      perspective: {
+        '1000': '1000px',
+      },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
@@ -178,7 +181,28 @@ export default {
           }
         },
       },
+      transformStyle: {
+        'preserve-3d': 'preserve-3d',
+      },
+      backfaceVisibility: {
+        'hidden': 'hidden',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.perspective-1000': {
+          perspective: '1000px',
+        },
+        '.preserve-3d': {
+          'transform-style': 'preserve-3d',
+        },
+        '.backface-hidden': {
+          'backface-visibility': 'hidden',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }
