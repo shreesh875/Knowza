@@ -546,7 +546,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
-      content: `Hi there! I'm BrainMate, your AI learning companion. I'm here to help you understand concepts, answer questions, and create quizzes based on your feed content.
+      content: `Hi there! I'm BrainMate, your AI learning companion powered by DeepSeek V3. I'm here to help you understand concepts, answer questions, and create quizzes based on your feed content.
 
 What would you like to explore today? I can explain complex topics in simple terms, help with homework, or even create a quick quiz to test your knowledge!`, 
       role: 'assistant',
@@ -891,8 +891,8 @@ export const BrainMate: React.FC = () => {
       setApiKey(envApiKey)
     }
 
-    // Use the provided default API key if no environment variable is set
-    const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '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'
+    // Use the new DeepSeek API key
+    const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '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'
     console.log('OpenRouter API Key:', envOpenRouterApiKey ? 'Present' : 'Missing')
     if (envOpenRouterApiKey) {
       setOpenRouterApiKey(envOpenRouterApiKey)
@@ -981,7 +981,7 @@ export const BrainMate: React.FC = () => {
             </div>
             BrainMate
           </h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion</p>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion powered by DeepSeek V3</p>
         </div>
         <div className="flex gap-2">
           <Button
