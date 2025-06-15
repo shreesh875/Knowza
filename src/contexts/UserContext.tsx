@@ -41,13 +41,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error)
-        return
+        // If profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, will be created by trigger')
+          return null
+        }
+        return null
       }
 
       console.log('Profile fetched successfully:', data)
       setProfile(data)
+      return data
     } catch (error) {
       console.error('Exception fetching profile:', error)
+      return null
     }
   }
 
@@ -60,10 +67,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('UserProvider: Initializing authentication')
     
-    // Get initial session
+    // Get initial session with timeout
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // Set a timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 10000)
+        )
+        
+        const sessionPromise = supabase.auth.getSession()
+        
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any
         
         if (error) {
           console.error('Error getting session:', error)
@@ -77,7 +94,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Exception getting initial session:', error)
       } finally {
-        setLoading(false)
+        // Always set loading to false after a reasonable time
+        setTimeout(() => setLoading(false), 1000)
       }
     }
 

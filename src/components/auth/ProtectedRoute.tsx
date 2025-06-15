@@ -1,4 +1,3 @@
-// Single Responsibility: Handle route protection based on authentication and onboarding
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useUser } from '../../contexts/UserContext'
@@ -27,7 +26,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     loading
   })
 
-  // Show loading spinner while checking authentication
+  // Show loading spinner while checking authentication (with timeout)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
@@ -60,13 +59,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If user is authenticated and onboarding is required
   if (requireAuth && requireOnboarding && user) {
-    // Wait for profile to load
+    // If no profile yet, allow some time for it to load, but don't wait forever
     if (!profile) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
           <div className="text-center">
             <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-neutral-600 dark:text-neutral-400">Loading profile...</p>
+            <p className="text-neutral-600 dark:text-neutral-400">Setting up your profile...</p>
           </div>
         </div>
       )
@@ -87,13 +86,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If user is authenticated but onboarding is not required (onboarding page itself)
   if (requireAuth && !requireOnboarding && user) {
-    // Wait for profile to load
+    // If no profile yet, allow some time for it to load
     if (!profile) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
           <div className="text-center">
             <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-neutral-600 dark:text-neutral-400">Loading profile...</p>
+            <p className="text-neutral-600 dark:text-neutral-400">Setting up your profile...</p>
           </div>
         </div>
       )

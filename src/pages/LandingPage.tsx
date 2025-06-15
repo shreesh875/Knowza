@@ -72,15 +72,20 @@ export const LandingPage: React.FC = () => {
     }
   ]
 
-  // Redirect authenticated users
+  // Redirect authenticated users with a timeout fallback
   useEffect(() => {
-    if (!loading && user) {
-      if (profile?.onboarding_completed) {
-        navigate('/app')
-      } else {
-        navigate('/onboarding/interests')
+    // Don't redirect immediately, wait a bit for auth state to settle
+    const redirectTimer = setTimeout(() => {
+      if (!loading && user) {
+        if (profile?.onboarding_completed) {
+          navigate('/app')
+        } else if (profile) {
+          navigate('/onboarding/interests')
+        }
       }
-    }
+    }, 2000) // Wait 2 seconds for auth state to settle
+
+    return () => clearTimeout(redirectTimer)
   }, [user, profile, loading, navigate])
 
   // Generate stars on mount
@@ -125,7 +130,6 @@ export const LandingPage: React.FC = () => {
     setSlideDirection('next')
     setCurrentSlide(prev => (prev + 1) % videoSlides.length)
     
-    // Apple's signature timing - slightly longer for premium feel
     setTimeout(() => {
       setIsTransitioning(false)
     }, 1200)
@@ -175,7 +179,6 @@ export const LandingPage: React.FC = () => {
     navigate('/signin')
   }
 
-  // Apple's signature slide transform with physics-based motion
   const getSlideTransform = (index: number) => {
     const isActive = index === currentSlide
     const isPrev = index === (currentSlide - 1 + videoSlides.length) % videoSlides.length
@@ -208,7 +211,6 @@ export const LandingPage: React.FC = () => {
       }
     }
     
-    // Distant slides
     return {
       transform: 'translateX(0%) scale(0.75) translateZ(0)',
       opacity: 0,
@@ -217,6 +219,7 @@ export const LandingPage: React.FC = () => {
     }
   }
 
+  // Show loading only briefly, then show the landing page regardless
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
@@ -232,7 +235,6 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[#0A0A0A] text-white overflow-hidden relative">
       {/* Starry Background */}
       <div className="absolute inset-0">
-        {/* Static Stars */}
         {stars.map((star) => (
           <div
             key={star.id}
@@ -254,7 +256,6 @@ export const LandingPage: React.FC = () => {
           onMouseLeave={() => setIsNavHovered(false)}
         >
           <div className="flex items-center justify-between h-12">
-            {/* Logo Section */}
             <div className="flex items-center space-x-3 cursor-pointer relative overflow-hidden">
               <img 
                 src="/Knowza Symbol.png" 
@@ -274,7 +275,6 @@ export const LandingPage: React.FC = () => {
               </span>
             </div>
             
-            {/* Centered Navigation Items */}
             <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-12">
               <a href="#features" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-base font-medium hover:scale-105">
                 Features
@@ -284,7 +284,6 @@ export const LandingPage: React.FC = () => {
               </a>
             </div>
             
-            {/* Login Button */}
             <button 
               onClick={handleSignIn}
               className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-base font-medium hover:scale-105"
@@ -321,10 +320,9 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Apple-Style Video Carousel */}
+      {/* Video Carousel Section */}
       <div id="features" className="relative z-10 py-32 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Video Carousel Container */}
           <div className="relative flex items-center justify-center">
             {/* Left Peek Panel */}
             <div className="hidden lg:block absolute left-8 top-1/2 transform -translate-y-1/2 z-10">
@@ -364,7 +362,6 @@ export const LandingPage: React.FC = () => {
 
             {/* Main Video Display */}
             <div className="relative h-[500px] w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl mx-auto perspective-1000">
-              {/* Video Content */}
               <div className="relative w-full h-full preserve-3d">
                 {videoSlides.map((slide, index) => {
                   const slideStyle = getSlideTransform(index)
@@ -394,10 +391,8 @@ export const LandingPage: React.FC = () => {
                         <source src={slide.videoUrl} type="video/mp4" />
                       </video>
                       
-                      {/* Video Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                       
-                      {/* Content Overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-8">
                         <div className="max-w-xl transform transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)] translate-y-0 opacity-100">
                           <h3 className="text-3xl font-bold mb-3 text-white transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)]">
@@ -412,7 +407,6 @@ export const LandingPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Play/Pause Button */}
                       <button
                         onClick={togglePlayPause}
                         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/30 hover:scale-110 active:scale-95"
@@ -428,7 +422,6 @@ export const LandingPage: React.FC = () => {
                 })}
               </div>
 
-              {/* Navigation Arrows */}
               <button
                 onClick={prevSlide}
                 disabled={isTransitioning}
@@ -447,7 +440,6 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Dot Navigation */}
           <div className="flex justify-center mt-8 space-x-3">
             {videoSlides.map((_, index) => (
               <button
@@ -468,7 +460,6 @@ export const LandingPage: React.FC = () => {
       {/* Spacer Section */}
       <div className="relative z-10 py-24">
         <div className="max-w-6xl mx-auto px-4">
-          {/* Optional: Add subtle decorative elements */}
           <div className="flex justify-center items-center space-x-8 opacity-20">
             <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
             <div className="w-3 h-3 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
@@ -477,12 +468,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Empty Video Panel Section */}
+      {/* Video Panel Section */}
       <div id="video" className="relative z-10 py-32 px-4">
         <div className="max-w-6xl mx-auto">
-          {/* Empty Video Container */}
           <div className="relative w-full h-[600px] bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
-            {/* Placeholder Content */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/20">
@@ -498,7 +487,6 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
             
-            {/* Decorative Elements */}
             <div className="absolute top-6 left-6">
               <div className="w-3 h-3 bg-white/30 rounded-full"></div>
             </div>
@@ -509,7 +497,6 @@ export const LandingPage: React.FC = () => {
               <div className="w-3 h-3 bg-white/10 rounded-full"></div>
             </div>
             
-            {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
           </div>
         </div>
