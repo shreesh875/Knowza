@@ -1,5 +1,5 @@
 import React from 'react'
-import { RefreshCw, Search } from 'lucide-react'
+import { RefreshCw, Search, Shuffle } from 'lucide-react'
 import { FeedPost } from '../components/feed/FeedPost'
 import { FeedFilters } from '../components/feed/FeedFilters'
 import { Button } from '../components/ui/Button'
@@ -13,8 +13,6 @@ export const Home: React.FC = () => {
     refresh,
     searchPapers,
     filterByField,
-    switchDataSource,
-    currentDataSource,
     hasMore,
     loadMore
   } = useFeedData()
@@ -26,10 +24,20 @@ export const Home: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Your Feed</h1>
           <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-            Latest research papers and educational content
+            Latest research papers from multiple academic databases
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refresh}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            <Shuffle className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            New Mix
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -47,8 +55,6 @@ export const Home: React.FC = () => {
       <FeedFilters 
         onSearch={searchPapers}
         onFilterByField={filterByField}
-        onSwitchDataSource={switchDataSource}
-        currentDataSource={currentDataSource}
         loading={loading}
       />
 
@@ -58,25 +64,25 @@ export const Home: React.FC = () => {
           <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
             {posts.length}
           </div>
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">Total Posts</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">Papers Loaded</div>
         </div>
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {posts.filter(p => p.contentType === 'paper').length}
+            {posts.filter(p => p.source === 'openalex').length}
           </div>
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">Research Papers</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">OpenAlex</div>
         </div>
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {posts.filter(p => p.contentType === 'video').length}
+            {posts.filter(p => p.source === 'semantic_scholar').length}
           </div>
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">Videos</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">Semantic Scholar</div>
         </div>
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
           <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {posts.filter(p => p.contentType === 'article').length}
+            {new Set(posts.map(p => p.tags).flat()).size}
           </div>
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">Articles</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">Unique Topics</div>
         </div>
       </div>
 
@@ -93,12 +99,12 @@ export const Home: React.FC = () => {
       )}
 
       {/* Loading State */}
-      {loading && (
+      {loading && posts.length === 0 && (
         <div className="flex items-center justify-center py-8">
           <div className="flex items-center gap-3">
             <RefreshCw className="w-5 h-5 animate-spin text-primary-600" />
             <span className="text-neutral-600 dark:text-neutral-400">
-              Loading latest research papers...
+              Loading research papers from multiple sources...
             </span>
           </div>
         </div>
@@ -112,21 +118,22 @@ export const Home: React.FC = () => {
               <Search className="w-8 h-8 text-neutral-400" />
             </div>
             <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">
-              No posts found
+              No papers found
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-              No posts match the current filters. Try adjusting your search or filter settings.
+              No papers match the current search. Try adjusting your search terms or browse all fields.
             </p>
             <Button
               variant="outline"
               onClick={refresh}
             >
-              Refresh Feed
+              <Shuffle className="w-4 h-4 mr-2" />
+              Get Random Papers
             </Button>
           </div>
         ) : (
           posts.map((post) => (
-            <FeedPost key={post.id} post={post} />
+            <FeedPost key={`${post.source}-${post.id}`} post={post} />
           ))
         )}
       </div>
@@ -141,6 +148,18 @@ export const Home: React.FC = () => {
           >
             Load More Papers
           </Button>
+        </div>
+      )}
+
+      {/* Loading More Indicator */}
+      {loading && posts.length > 0 && (
+        <div className="text-center py-6">
+          <div className="flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-primary-600" />
+            <span className="text-neutral-600 dark:text-neutral-400 text-sm">
+              Loading more papers...
+            </span>
+          </div>
         </div>
       )}
     </div>
