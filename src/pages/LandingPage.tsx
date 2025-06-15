@@ -20,6 +20,7 @@ export const LandingPage: React.FC = () => {
   const [shootingStars, setShootingStars] = useState<Array<{ id: number; startX: number; startY: number; endX: number; endY: number; delay: number }>>([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isNavHovered, setIsNavHovered] = useState(false)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const videoSlides: VideoSlide[] = [
@@ -279,34 +280,48 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white/10 backdrop-blur-xl rounded-full px-12 py-4 border border-white/20 min-w-[800px]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 group cursor-pointer">
+      <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+        <div 
+          className="bg-white/10 backdrop-blur-xl rounded-full px-8 py-2 border border-white/20 min-w-[900px]"
+          onMouseEnter={() => setIsNavHovered(true)}
+          onMouseLeave={() => setIsNavHovered(false)}
+        >
+          <div className="flex items-center justify-between h-12">
+            {/* Logo Section */}
+            <div className="flex items-center space-x-3 group cursor-pointer relative overflow-hidden">
               <img 
                 src="/Knowza Symbol.png" 
                 alt="Knowza" 
-                className="w-8 h-8 transition-transform duration-300 group-hover:rotate-180"
+                className="w-7 h-7 transition-transform duration-300 group-hover:rotate-180 relative z-10"
               />
-              <span className="text-white font-bold text-xl transition-all duration-300 group-hover:text-[#4AB0F3]">
+              <span 
+                className={`text-white font-bold text-xl transition-all duration-500 ease-out ${
+                  isNavHovered 
+                    ? 'opacity-100 transform translate-x-0' 
+                    : 'opacity-0 transform -translate-x-4'
+                }`}
+              >
                 Knowza
               </span>
             </div>
             
-            <div className="flex items-center space-x-10">
-              <a href="#features" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-full transition-all duration-200 text-lg">
+            {/* Centered Navigation Items */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-12">
+              <a href="#features" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-200 text-base font-medium">
                 Features
               </a>
-              <a href="#about" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-full transition-all duration-200 text-lg">
+              <a href="#about" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-200 text-base font-medium">
                 About
               </a>
-              <button 
-                onClick={handleSignIn}
-                className="text-white/80 hover:text-white hover:bg-white/10 px-8 py-3 rounded-full transition-all duration-200 text-lg font-medium"
-              >
-                Log in
-              </button>
             </div>
+            
+            {/* Login Button */}
+            <button 
+              onClick={handleSignIn}
+              className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-200 text-base font-medium"
+            >
+              Log in
+            </button>
           </div>
         </div>
       </nav>
