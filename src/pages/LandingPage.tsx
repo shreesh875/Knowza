@@ -288,11 +288,13 @@ export const LandingPage: React.FC = () => {
         >
           <div className="flex items-center justify-between h-12">
             {/* Logo Section */}
-            <div className="flex items-center space-x-3 group cursor-pointer relative overflow-hidden">
+            <div className="flex items-center space-x-3 cursor-pointer relative overflow-hidden">
               <img 
                 src="/Knowza Symbol.png" 
                 alt="Knowza" 
-                className="w-7 h-7 transition-transform duration-300 group-hover:rotate-180 relative z-10"
+                className={`w-7 h-7 transition-transform duration-500 relative z-10 ${
+                  isNavHovered ? 'rotate-180' : 'rotate-0'
+                }`}
               />
               <span 
                 className={`text-white font-bold text-xl transition-all duration-500 ease-out ${
@@ -369,7 +371,7 @@ export const LandingPage: React.FC = () => {
           <div className="relative flex items-center justify-center">
             {/* Left Peek Panel */}
             <div className="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-32 h-80 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+              <div className="w-24 h-64 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
                 <div 
                   className="w-full h-full bg-cover bg-center opacity-60"
                   style={{ 
@@ -377,7 +379,7 @@ export const LandingPage: React.FC = () => {
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
-                <div className="absolute bottom-4 left-4 right-4">
+                <div className="absolute bottom-4 left-2 right-2">
                   <p className="text-white text-xs font-medium truncate">
                     {videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].title}
                   </p>
@@ -387,7 +389,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Right Peek Panel */}
             <div className="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-32 h-80 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+              <div className="w-24 h-64 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
                 <div 
                   className="w-full h-full bg-cover bg-center opacity-60"
                   style={{ 
@@ -395,7 +397,7 @@ export const LandingPage: React.FC = () => {
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/60" />
-                <div className="absolute bottom-4 left-4 right-4">
+                <div className="absolute bottom-4 left-2 right-2">
                   <p className="text-white text-xs font-medium truncate">
                     {videoSlides[(currentSlide + 1) % videoSlides.length].title}
                   </p>
@@ -404,7 +406,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Main Video Display - Smaller */}
-            <div className="relative h-[480px] w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl mx-auto">
+            <div className="relative h-[400px] w-full max-w-3xl bg-black rounded-3xl overflow-hidden shadow-2xl mx-auto">
               {/* Video Content */}
               <div className="relative w-full h-full">
                 {videoSlides.map((slide, index) => (
