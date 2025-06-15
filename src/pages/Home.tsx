@@ -1,5 +1,5 @@
 import React from 'react'
-import { RefreshCw, Search, Shuffle } from 'lucide-react'
+import { RefreshCw, Search, Shuffle, Zap } from 'lucide-react'
 import { FeedPost } from '../components/feed/FeedPost'
 import { FeedFilters } from '../components/feed/FeedFilters'
 import { Button } from '../components/ui/Button'
@@ -58,6 +58,20 @@ export const Home: React.FC = () => {
         loading={loading}
       />
 
+      {/* Quick Load Banner */}
+      {!loading && posts.length === 0 && (
+        <div className="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-lg p-6 border border-primary-200 dark:border-primary-800">
+          <div className="flex items-center gap-3 mb-3">
+            <Zap className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+            <h3 className="font-semibold text-primary-900 dark:text-primary-100">Lightning Fast Research Feed</h3>
+          </div>
+          <p className="text-primary-700 dark:text-primary-300 text-sm">
+            Get instant access to the latest research papers from OpenAlex and Semantic Scholar. 
+            Each refresh brings you a fresh mix of cutting-edge academic content.
+          </p>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
@@ -98,13 +112,16 @@ export const Home: React.FC = () => {
         </div>
       )}
 
-      {/* Loading State */}
+      {/* Loading State - Only show when actually loading */}
       {loading && posts.length === 0 && (
-        <div className="flex items-center justify-center py-8">
+        <div className="flex items-center justify-center py-12">
           <div className="flex items-center gap-3">
-            <RefreshCw className="w-5 h-5 animate-spin text-primary-600" />
+            <div className="relative">
+              <div className="w-8 h-8 border-2 border-primary-200 dark:border-primary-800 rounded-full"></div>
+              <div className="absolute top-0 left-0 w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
             <span className="text-neutral-600 dark:text-neutral-400">
-              Loading research papers from multiple sources...
+              Loading fresh research papers...
             </span>
           </div>
         </div>
@@ -155,7 +172,10 @@ export const Home: React.FC = () => {
       {loading && posts.length > 0 && (
         <div className="text-center py-6">
           <div className="flex items-center justify-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-primary-600" />
+            <div className="relative">
+              <div className="w-4 h-4 border-2 border-primary-200 dark:border-primary-800 rounded-full"></div>
+              <div className="absolute top-0 left-0 w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
             <span className="text-neutral-600 dark:text-neutral-400 text-sm">
               Loading more papers...
             </span>
