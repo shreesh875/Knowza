@@ -1,3 +1,5 @@
+import { rateLimiter } from './rateLimiter'
+
 interface OpenAlexWork {
   id: string
   title: string
@@ -159,95 +161,99 @@ class OpenAlexService {
     perPage: number = 10,
     filter?: string
   ): Promise<{ papers: FeedPost[], total: number, page: number, per_page: number }> {
-    try {
-      console.log('Searching OpenAlex works with query:', query)
-      
-      const url = new URL(this.baseUrl)
-      url.searchParams.set('endpoint', 'works')
-      url.searchParams.set('query', query)
-      url.searchParams.set('page', page.toString())
-      url.searchParams.set('per_page', perPage.toString())
-      
-      if (filter) {
-        url.searchParams.set('filter', filter)
+    return rateLimiter.addRequest(async () => {
+      try {
+        console.log('Searching OpenAlex works with query:', query)
+        
+        const url = new URL(this.baseUrl)
+        url.searchParams.set('endpoint', 'works')
+        url.searchParams.set('query', query)
+        url.searchParams.set('page', page.toString())
+        url.searchParams.set('per_page', perPage.toString())
+        
+        if (filter) {
+          url.searchParams.set('filter', filter)
+        }
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data: OpenAlexResponse = await response.json()
+        console.log('OpenAlex works fetched successfully:', data.papers?.length || 0)
+
+        // Transform the papers to ensure proper image URLs
+        const transformedPapers = data.papers?.map(paper => ({
+          ...paper,
+          thumbnail: this.generatePaperThumbnail(paper.id, paper.tags),
+          authorAvatar: this.generateAuthorAvatar(paper.author),
+          timeAgo: paper.year ? this.formatTimeAgo(paper.year) : 'Unknown',
+          contentType: 'paper' as const,
+          source: 'openalex' as const
+        })) || []
+
+        return {
+          papers: transformedPapers,
+          total: data.total || 0,
+          page: data.page || 1,
+          per_page: data.per_page || 10
+        }
+      } catch (error) {
+        console.error('Error fetching OpenAlex works:', error)
+        throw new Error(`Failed to fetch papers: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
-
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data: OpenAlexResponse = await response.json()
-      console.log('OpenAlex works fetched successfully:', data.papers?.length || 0)
-
-      // Transform the papers to ensure proper image URLs
-      const transformedPapers = data.papers?.map(paper => ({
-        ...paper,
-        thumbnail: this.generatePaperThumbnail(paper.id, paper.tags),
-        authorAvatar: this.generateAuthorAvatar(paper.author),
-        timeAgo: paper.year ? this.formatTimeAgo(paper.year) : 'Unknown',
-        contentType: 'paper' as const,
-        source: 'openalex' as const
-      })) || []
-
-      return {
-        papers: transformedPapers,
-        total: data.total || 0,
-        page: data.page || 1,
-        per_page: data.per_page || 10
-      }
-    } catch (error) {
-      console.error('Error fetching OpenAlex works:', error)
-      throw new Error(`Failed to fetch papers: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+    })
   }
 
   async getWorkById(workId: string): Promise<FeedPost | null> {
-    try {
-      console.log('Fetching OpenAlex work by ID:', workId)
-      
-      const url = new URL(this.baseUrl)
-      url.searchParams.set('endpoint', 'works')
-      url.searchParams.set('workId', workId)
+    return rateLimiter.addRequest(async () => {
+      try {
+        console.log('Fetching OpenAlex work by ID:', workId)
+        
+        const url = new URL(this.baseUrl)
+        url.searchParams.set('endpoint', 'works')
+        url.searchParams.set('workId', workId)
 
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-      })
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log('OpenAlex work fetched successfully:', data.paper ? 'Found' : 'Not found')
-
-      if (data.paper) {
-        return {
-          ...data.paper,
-          thumbnail: this.generatePaperThumbnail(data.paper.id, data.paper.tags),
-          authorAvatar: this.generateAuthorAvatar(data.paper.author),
-          timeAgo: data.paper.year ? this.formatTimeAgo(data.paper.year) : 'Unknown',
-          contentType: 'paper' as const,
-          source: 'openalex' as const
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-      }
 
-      return null
-    } catch (error) {
-      console.error('Error fetching OpenAlex work by ID:', error)
-      throw new Error(`Failed to fetch paper: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+        const data = await response.json()
+        console.log('OpenAlex work fetched successfully:', data.paper ? 'Found' : 'Not found')
+
+        if (data.paper) {
+          return {
+            ...data.paper,
+            thumbnail: this.generatePaperThumbnail(data.paper.id, data.paper.tags),
+            authorAvatar: this.generateAuthorAvatar(data.paper.author),
+            timeAgo: data.paper.year ? this.formatTimeAgo(data.paper.year) : 'Unknown',
+            contentType: 'paper' as const,
+            source: 'openalex' as const
+          }
+        }
+
+        return null
+      } catch (error) {
+        console.error('Error fetching OpenAlex work by ID:', error)
+        throw new Error(`Failed to fetch paper: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    })
   }
 
   async getTopics(
@@ -255,38 +261,40 @@ class OpenAlexService {
     perPage: number = 25,
     filter?: string
   ): Promise<OpenAlexTopicsResponse> {
-    try {
-      console.log('Fetching OpenAlex topics')
-      
-      const url = new URL(this.baseUrl)
-      url.searchParams.set('endpoint', 'topics')
-      url.searchParams.set('page', page.toString())
-      url.searchParams.set('per_page', perPage.toString())
-      
-      if (filter) {
-        url.searchParams.set('filter', filter)
+    return rateLimiter.addRequest(async () => {
+      try {
+        console.log('Fetching OpenAlex topics')
+        
+        const url = new URL(this.baseUrl)
+        url.searchParams.set('endpoint', 'topics')
+        url.searchParams.set('page', page.toString())
+        url.searchParams.set('per_page', perPage.toString())
+        
+        if (filter) {
+          url.searchParams.set('filter', filter)
+        }
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data: OpenAlexTopicsResponse = await response.json()
+        console.log('OpenAlex topics fetched successfully:', data.topics?.length || 0)
+
+        return data
+      } catch (error) {
+        console.error('Error fetching OpenAlex topics:', error)
+        throw new Error(`Failed to fetch topics: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
-
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data: OpenAlexTopicsResponse = await response.json()
-      console.log('OpenAlex topics fetched successfully:', data.topics?.length || 0)
-
-      return data
-    } catch (error) {
-      console.error('Error fetching OpenAlex topics:', error)
-      throw new Error(`Failed to fetch topics: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+    })
   }
 
   async getWorksByTopic(

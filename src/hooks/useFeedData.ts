@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import SemanticScholarService, { type FeedPost } from '../services/semanticScholarService'
 import OpenAlexService from '../services/openAlexService'
+import { rateLimiter } from '../services/rateLimiter'
 
 interface UseFeedDataReturn {
   posts: FeedPost[]
@@ -11,6 +12,7 @@ interface UseFeedDataReturn {
   refresh: () => Promise<void>
   searchPapers: (query: string) => Promise<void>
   filterByField: (field: string) => Promise<void>
+  queueLength: number
 }
 
 // Research topics for variety
@@ -46,9 +48,19 @@ export const useFeedData = (): UseFeedDataReturn => {
   const [currentQuery, setCurrentQuery] = useState('')
   const [loadedPostIds, setLoadedPostIds] = useState<Set<string>>(new Set())
   const [isInitialized, setIsInitialized] = useState(false)
+  const [queueLength, setQueueLength] = useState(0)
 
   const semanticScholarService = new SemanticScholarService()
   const openAlexService = new OpenAlexService()
+
+  // Monitor rate limiter queue
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQueueLength(rateLimiter.getQueueLength())
+    }, 500)
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Get random topics for variety
   const getRandomTopics = (count: number = 4) => {
@@ -88,7 +100,7 @@ export const useFeedData = (): UseFeedDataReturn => {
     return unique
   }
 
-  // Load mixed papers from both APIs with better error handling
+  // Load mixed papers from both APIs with rate limiting
   const loadMixedPapers = useCallback(async (
     query: string = '',
     page: number = 1,
@@ -101,60 +113,51 @@ export const useFeedData = (): UseFeedDataReturn => {
       let allPapers: FeedPost[] = []
 
       if (query) {
-        // If there's a specific query, search both APIs with timeout
-        const promises = [
-          Promise.race([
-            semanticScholarService.searchPapers(query, 6, (page - 1) * 6),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 8000))
-          ]).catch(() => ({ papers: [] })),
-          Promise.race([
-            openAlexService.searchWorks(query, page, 6),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 8000))
-          ]).catch(() => ({ papers: [] }))
-        ]
-
-        const results = await Promise.allSettled(promises)
+        console.log('🔍 Searching with query:', query)
+        console.log('📊 Rate limiter queue length:', rateLimiter.getQueueLength())
         
-        results.forEach(result => {
-          if (result.status === 'fulfilled' && result.value.papers) {
-            allPapers.push(...result.value.papers)
-          }
-        })
+        // Sequential requests with rate limiting (1 per second)
+        try {
+          const semanticResult = await semanticScholarService.searchPapers(query, 6, (page - 1) * 6)
+          allPapers.push(...semanticResult.papers)
+          console.log('✅ Semantic Scholar:', semanticResult.papers.length, 'papers')
+        } catch (error) {
+          console.warn('⚠️ Semantic Scholar failed:', error)
+        }
+
+        try {
+          const openAlexResult = await openAlexService.searchWorks(query, page, 6)
+          allPapers.push(...openAlexResult.papers)
+          console.log('✅ OpenAlex:', openAlexResult.papers.length, 'papers')
+        } catch (error) {
+          console.warn('⚠️ OpenAlex failed:', error)
+        }
       } else {
-        // For general browsing, use fewer topics and faster loading
+        // For general browsing, use fewer topics and sequential loading
         const topics = getRandomTopics(3) // Reduced from 6 to 3
-        const promises: Promise<any>[] = []
+        console.log('🎯 Loading topics:', topics)
+        console.log('📊 Rate limiter queue length:', rateLimiter.getQueueLength())
 
-        // Use only 3 requests instead of 6 for faster loading
-        topics.forEach((topic, index) => {
-          if (index < 2) {
-            // Use Semantic Scholar for first 2
-            promises.push(
-              Promise.race([
-                semanticScholarService.searchPapers(topic, 4, 0),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
-              ]).then(result => ({ source: 'semantic', papers: result.papers }))
-                .catch(() => ({ source: 'semantic', papers: [] }))
-            )
-          } else {
-            // Use OpenAlex for the last one
-            promises.push(
-              Promise.race([
-                openAlexService.searchWorks(topic, 1, 4),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
-              ]).then(result => ({ source: 'openalex', papers: result.papers }))
-                .catch(() => ({ source: 'openalex', papers: [] }))
-            )
+        // Sequential requests to respect rate limiting
+        for (let i = 0; i < topics.length; i++) {
+          const topic = topics[i]
+          
+          try {
+            if (i < 2) {
+              // Use Semantic Scholar for first 2
+              const result = await semanticScholarService.searchPapers(topic, 4, 0)
+              allPapers.push(...result.papers)
+              console.log(`✅ Semantic Scholar (${topic}):`, result.papers.length, 'papers')
+            } else {
+              // Use OpenAlex for the last one
+              const result = await openAlexService.searchWorks(topic, 1, 4)
+              allPapers.push(...result.papers)
+              console.log(`✅ OpenAlex (${topic}):`, result.papers.length, 'papers')
+            }
+          } catch (error) {
+            console.warn(`⚠️ Failed to load topic "${topic}":`, error)
           }
-        })
-
-        const results = await Promise.allSettled(promises)
-        
-        results.forEach(result => {
-          if (result.status === 'fulfilled' && result.value.papers) {
-            allPapers.push(...result.value.papers)
-          }
-        })
+        }
       }
 
       // Remove duplicates and shuffle for variety
@@ -163,6 +166,8 @@ export const useFeedData = (): UseFeedDataReturn => {
       
       // Limit to reasonable number per load
       const limitedPapers = shuffledPapers.slice(0, 12) // Reduced from 15 to 12
+
+      console.log('📝 Final result:', limitedPapers.length, 'unique papers')
 
       if (append) {
         setPosts(prev => {
@@ -221,27 +226,27 @@ export const useFeedData = (): UseFeedDataReturn => {
       setLoading(true)
       setError(null)
 
-      // Get papers from both APIs for the field with timeout
-      const promises = [
-        Promise.race([
-          semanticScholarService.getPapersByField(field, 6),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
-        ]).catch(() => ({ papers: [] })),
-        Promise.race([
-          openAlexService.getWorksByField(field, 1, 6),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000))
-        ]).catch(() => ({ papers: [] }))
-      ]
-
-      const results = await Promise.allSettled(promises)
+      console.log('🔍 Filtering by field:', field)
+      console.log('📊 Rate limiter queue length:', rateLimiter.getQueueLength())
 
       let allPapers: FeedPost[] = []
 
-      results.forEach(result => {
-        if (result.status === 'fulfilled' && result.value.papers) {
-          allPapers.push(...result.value.papers)
-        }
-      })
+      // Sequential requests with rate limiting
+      try {
+        const semanticResult = await semanticScholarService.getPapersByField(field, 6)
+        allPapers.push(...semanticResult.papers)
+        console.log('✅ Semantic Scholar:', semanticResult.papers.length, 'papers')
+      } catch (error) {
+        console.warn('⚠️ Semantic Scholar failed:', error)
+      }
+
+      try {
+        const openAlexResult = await openAlexService.getWorksByField(field, 1, 6)
+        allPapers.push(...openAlexResult.papers)
+        console.log('✅ OpenAlex:', openAlexResult.papers.length, 'papers')
+      } catch (error) {
+        console.warn('⚠️ OpenAlex failed:', error)
+      }
 
       // Remove duplicates and shuffle
       const uniquePapers = removeDuplicates(allPapers)
@@ -251,6 +256,8 @@ export const useFeedData = (): UseFeedDataReturn => {
       setLoadedPostIds(new Set(shuffledPapers.slice(0, 12).map(p => p.id)))
       setCurrentPage(1)
       setHasMore(shuffledPapers.length >= 8)
+      
+      console.log('📝 Filter result:', shuffledPapers.slice(0, 12).length, 'unique papers')
       
     } catch (err) {
       console.error('Error filtering papers:', err)
@@ -282,5 +289,6 @@ export const useFeedData = (): UseFeedDataReturn => {
     refresh,
     searchPapers,
     filterByField,
+    queueLength,
   }
 }

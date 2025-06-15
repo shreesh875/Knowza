@@ -1,3 +1,5 @@
+import { rateLimiter } from './rateLimiter'
+
 interface SemanticScholarPaper {
   paperId: string
   title: string
@@ -121,87 +123,91 @@ class SemanticScholarService {
     limit: number = 10,
     offset: number = 0
   ): Promise<{ papers: FeedPost[], total: number }> {
-    try {
-      console.log('Searching papers with query:', query)
-      
-      const url = new URL(this.baseUrl)
-      url.searchParams.set('query', query)
-      url.searchParams.set('limit', limit.toString())
-      url.searchParams.set('offset', offset.toString())
+    return rateLimiter.addRequest(async () => {
+      try {
+        console.log('Searching Semantic Scholar papers with query:', query)
+        
+        const url = new URL(this.baseUrl)
+        url.searchParams.set('query', query)
+        url.searchParams.set('limit', limit.toString())
+        url.searchParams.set('offset', offset.toString())
 
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-      })
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data: SemanticScholarResponse = await response.json()
+        console.log('Semantic Scholar papers fetched successfully:', data.papers?.length || 0)
+
+        // Transform the papers to ensure proper image URLs
+        const transformedPapers = data.papers?.map(paper => ({
+          ...paper,
+          thumbnail: this.generatePaperThumbnail(paper.id, paper.tags),
+          authorAvatar: this.generateAuthorAvatar(paper.author),
+          timeAgo: paper.year ? this.formatTimeAgo(paper.year) : 'Unknown',
+          contentType: 'paper' as const,
+          source: 'semantic_scholar' as const
+        })) || []
+
+        return {
+          papers: transformedPapers,
+          total: data.total || 0
+        }
+      } catch (error) {
+        console.error('Error fetching Semantic Scholar papers:', error)
+        throw new Error(`Failed to fetch papers: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
-
-      const data: SemanticScholarResponse = await response.json()
-      console.log('Papers fetched successfully:', data.papers?.length || 0)
-
-      // Transform the papers to ensure proper image URLs
-      const transformedPapers = data.papers?.map(paper => ({
-        ...paper,
-        thumbnail: this.generatePaperThumbnail(paper.id, paper.tags),
-        authorAvatar: this.generateAuthorAvatar(paper.author),
-        timeAgo: paper.year ? this.formatTimeAgo(paper.year) : 'Unknown',
-        contentType: 'paper' as const,
-        source: 'semantic_scholar' as const
-      })) || []
-
-      return {
-        papers: transformedPapers,
-        total: data.total || 0
-      }
-    } catch (error) {
-      console.error('Error fetching papers:', error)
-      throw new Error(`Failed to fetch papers: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+    })
   }
 
   async getPaperById(paperId: string): Promise<FeedPost | null> {
-    try {
-      console.log('Fetching paper by ID:', paperId)
-      
-      const url = new URL(this.baseUrl)
-      url.searchParams.set('paperId', paperId)
+    return rateLimiter.addRequest(async () => {
+      try {
+        console.log('Fetching Semantic Scholar paper by ID:', paperId)
+        
+        const url = new URL(this.baseUrl)
+        url.searchParams.set('paperId', paperId)
 
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-      })
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log('Paper fetched successfully:', data.paper ? 'Found' : 'Not found')
-
-      if (data.paper) {
-        return {
-          ...data.paper,
-          thumbnail: this.generatePaperThumbnail(data.paper.id, data.paper.tags),
-          authorAvatar: this.generateAuthorAvatar(data.paper.author),
-          timeAgo: data.paper.year ? this.formatTimeAgo(data.paper.year) : 'Unknown',
-          contentType: 'paper' as const,
-          source: 'semantic_scholar' as const
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
-      }
 
-      return null
-    } catch (error) {
-      console.error('Error fetching paper by ID:', error)
-      throw new Error(`Failed to fetch paper: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
+        const data = await response.json()
+        console.log('Semantic Scholar paper fetched successfully:', data.paper ? 'Found' : 'Not found')
+
+        if (data.paper) {
+          return {
+            ...data.paper,
+            thumbnail: this.generatePaperThumbnail(data.paper.id, data.paper.tags),
+            authorAvatar: this.generateAuthorAvatar(data.paper.author),
+            timeAgo: data.paper.year ? this.formatTimeAgo(data.paper.year) : 'Unknown',
+            contentType: 'paper' as const,
+            source: 'semantic_scholar' as const
+          }
+        }
+
+        return null
+      } catch (error) {
+        console.error('Error fetching Semantic Scholar paper by ID:', error)
+        throw new Error(`Failed to fetch paper: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    })
   }
 
   async getPopularPapers(limit: number = 10): Promise<{ papers: FeedPost[], total: number }> {

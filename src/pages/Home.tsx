@@ -1,5 +1,5 @@
 import React from 'react'
-import { RefreshCw, Search, Shuffle, Zap } from 'lucide-react'
+import { RefreshCw, Search, Shuffle, Zap, Clock } from 'lucide-react'
 import { FeedPost } from '../components/feed/FeedPost'
 import { FeedFilters } from '../components/feed/FeedFilters'
 import { Button } from '../components/ui/Button'
@@ -14,7 +14,8 @@ export const Home: React.FC = () => {
     searchPapers,
     filterByField,
     hasMore,
-    loadMore
+    loadMore,
+    queueLength
   } = useFeedData()
 
   return (
@@ -51,6 +52,23 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* Rate Limiter Status */}
+      {queueLength > 0 && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center gap-3">
+            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div>
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">
+                Rate Limited Loading
+              </h3>
+              <p className="text-blue-700 dark:text-blue-300 text-sm">
+                {queueLength} request{queueLength !== 1 ? 's' : ''} queued • 1 request per second to respect API limits
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <FeedFilters 
         onSearch={searchPapers}
@@ -59,15 +77,15 @@ export const Home: React.FC = () => {
       />
 
       {/* Quick Load Banner */}
-      {!loading && posts.length === 0 && (
+      {!loading && posts.length === 0 && queueLength === 0 && (
         <div className="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-lg p-6 border border-primary-200 dark:border-primary-800">
           <div className="flex items-center gap-3 mb-3">
             <Zap className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-            <h3 className="font-semibold text-primary-900 dark:text-primary-100">Lightning Fast Research Feed</h3>
+            <h3 className="font-semibold text-primary-900 dark:text-primary-100">Rate-Limited Research Feed</h3>
           </div>
           <p className="text-primary-700 dark:text-primary-300 text-sm">
-            Get instant access to the latest research papers from OpenAlex and Semantic Scholar. 
-            Each refresh brings you a fresh mix of cutting-edge academic content.
+            Get access to the latest research papers from OpenAlex and Semantic Scholar. 
+            Requests are processed at 1 per second to respect API rate limits and ensure reliability.
           </p>
         </div>
       )}
@@ -94,9 +112,9 @@ export const Home: React.FC = () => {
         </div>
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
           <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {new Set(posts.map(p => p.tags).flat()).size}
+            {queueLength}
           </div>
-          <div className="text-sm text-neutral-600 dark:text-neutral-400">Unique Topics</div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">Queued Requests</div>
         </div>
       </div>
 
@@ -129,7 +147,7 @@ export const Home: React.FC = () => {
 
       {/* Posts Feed */}
       <div className="space-y-6">
-        {posts.length === 0 && !loading ? (
+        {posts.length === 0 && !loading && queueLength === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-neutral-400" />
