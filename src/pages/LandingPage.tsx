@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUser } from '../contexts/UserContext'
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react'
@@ -20,6 +20,7 @@ export const LandingPage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isNavHovered, setIsNavHovered] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const videoSlides: VideoSlide[] = [
@@ -99,22 +100,13 @@ export const LandingPage: React.FC = () => {
     generateStars()
   }, [])
 
-  // Auto-advance slides
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % videoSlides.length)
-    }, 8000)
-
-    return () => clearInterval(interval)
-  }, [videoSlides.length])
-
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
-        setCurrentSlide(prev => (prev - 1 + videoSlides.length) % videoSlides.length)
+        prevSlide()
       } else if (e.key === 'ArrowRight') {
-        setCurrentSlide(prev => (prev + 1) % videoSlides.length)
+        nextSlide()
       } else if (e.key === ' ') {
         e.preventDefault()
         togglePlayPause()
@@ -123,18 +115,42 @@ export const LandingPage: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [videoSlides.length])
+  }, [currentSlide, isTransitioning])
 
   const nextSlide = () => {
+    if (isTransitioning) return
+    
+    setIsTransitioning(true)
     setCurrentSlide(prev => (prev + 1) % videoSlides.length)
+    
+    // Reset transition state after animation completes
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 800)
   }
 
   const prevSlide = () => {
+    if (isTransitioning) return
+    
+    setIsTransitioning(true)
     setCurrentSlide(prev => (prev - 1 + videoSlides.length) % videoSlides.length)
+    
+    // Reset transition state after animation completes
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 800)
   }
 
   const goToSlide = (index: number) => {
+    if (isTransitioning || index === currentSlide) return
+    
+    setIsTransitioning(true)
     setCurrentSlide(index)
+    
+    // Reset transition state after animation completes
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 800)
   }
 
   const togglePlayPause = () => {
@@ -268,16 +284,16 @@ export const LandingPage: React.FC = () => {
           <div className="relative flex items-center justify-center">
             {/* Left Peek Panel */}
             <div className="hidden lg:block absolute left-8 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden transition-all duration-800 ease-out">
                 <div 
-                  className="w-full h-full bg-cover bg-center opacity-60"
+                  className="w-full h-full bg-cover bg-center opacity-60 transition-all duration-800 ease-out"
                   style={{ 
                     backgroundImage: `url(${videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].posterUrl})` 
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
                 <div className="absolute bottom-4 left-3 right-3">
-                  <p className="text-white text-xs font-medium truncate">
+                  <p className="text-white text-xs font-medium truncate transition-all duration-800 ease-out">
                     {videoSlides[(currentSlide - 1 + videoSlides.length) % videoSlides.length].title}
                   </p>
                 </div>
@@ -286,16 +302,16 @@ export const LandingPage: React.FC = () => {
 
             {/* Right Peek Panel */}
             <div className="hidden lg:block absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
-              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+              <div className="w-32 h-72 bg-black/40 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden transition-all duration-800 ease-out">
                 <div 
-                  className="w-full h-full bg-cover bg-center opacity-60"
+                  className="w-full h-full bg-cover bg-center opacity-60 transition-all duration-800 ease-out"
                   style={{ 
                     backgroundImage: `url(${videoSlides[(currentSlide + 1) % videoSlides.length].posterUrl})` 
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/60" />
                 <div className="absolute bottom-4 left-3 right-3">
-                  <p className="text-white text-xs font-medium truncate">
+                  <p className="text-white text-xs font-medium truncate transition-all duration-800 ease-out">
                     {videoSlides[(currentSlide + 1) % videoSlides.length].title}
                   </p>
                 </div>
@@ -309,10 +325,12 @@ export const LandingPage: React.FC = () => {
                 {videoSlides.map((slide, index) => (
                   <div
                     key={slide.id}
-                    className={`absolute inset-0 transition-all duration-700 ease-out ${
+                    className={`absolute inset-0 transition-all duration-800 ease-out ${
                       index === currentSlide 
-                        ? 'opacity-100 scale-100' 
-                        : 'opacity-0 scale-95'
+                        ? 'opacity-100 scale-100 translate-x-0' 
+                        : index < currentSlide
+                        ? 'opacity-0 scale-95 -translate-x-full'
+                        : 'opacity-0 scale-95 translate-x-full'
                     }`}
                   >
                     <video
@@ -333,7 +351,7 @@ export const LandingPage: React.FC = () => {
                     
                     {/* Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-8">
-                      <div className="max-w-xl">
+                      <div className="max-w-xl transform transition-all duration-800 ease-out">
                         <h3 className="text-3xl font-bold mb-3 text-white">
                           {slide.title}
                         </h3>
@@ -364,16 +382,18 @@ export const LandingPage: React.FC = () => {
               {/* Navigation Arrows */}
               <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110"
+                disabled={isTransitioning}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
               >
-                <ChevronLeft className="w-5 h-5 text-white" />
+                <ChevronLeft className="w-6 h-6 text-white" />
               </button>
               
               <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110"
+                disabled={isTransitioning}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
               >
-                <ChevronRight className="w-5 h-5 text-white" />
+                <ChevronRight className="w-6 h-6 text-white" />
               </button>
             </div>
           </div>
@@ -384,7 +404,8 @@ export const LandingPage: React.FC = () => {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                disabled={isTransitioning}
+                className={`w-3 h-3 rounded-full transition-all duration-300 disabled:cursor-not-allowed ${
                   index === currentSlide
                     ? 'bg-white scale-125'
                     : 'bg-white/40 hover:bg-white/60'
