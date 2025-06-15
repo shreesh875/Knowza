@@ -279,8 +279,8 @@ export const LandingPage: React.FC = () => {
               <a href="#features" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-base font-medium hover:scale-105">
                 Features
               </a>
-              <a href="#about" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-base font-medium hover:scale-105">
-                About
+              <a href="#video" className="text-white/80 hover:text-white hover:bg-white/10 px-6 py-2 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] text-base font-medium hover:scale-105">
+                Video
               </a>
             </div>
             
@@ -465,36 +465,40 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* About Section */}
-      <div id="about" className="relative z-10 py-20 px-4 bg-[#0F0F0F]">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8">
-            How can we help with your learning?
-          </h2>
-          
-          <p className="text-xl text-white/70 mb-16 max-w-4xl mx-auto">
-            Knowza uses AI to create personalized learning experiences that feel like social media, with study 
-            sessions, expert tutors, and peer collaboration - all in one platform.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/10 hover:-translate-y-2 group">
-              <div className="text-4xl mb-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">🎯</div>
-              <h3 className="text-2xl font-bold mb-4 transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#4AB0F3]">10M+</h3>
-              <p className="text-white/60">Research papers and educational content</p>
+      {/* Empty Video Panel Section */}
+      <div id="video" className="relative z-10 py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Empty Video Container */}
+          <div className="relative w-full h-[600px] bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
+            {/* Placeholder Content */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/20">
+                  <Play className="w-12 h-12 text-white/60" />
+                </div>
+                <h3 className="text-2xl font-bold text-white/80 mb-4">
+                  Video Content Coming Soon
+                </h3>
+                <p className="text-white/60 max-w-md mx-auto">
+                  This space is reserved for your custom video content. 
+                  You can replace this placeholder with any video you'd like to showcase.
+                </p>
+              </div>
             </div>
             
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/10 hover:-translate-y-2 group">
-              <div className="text-4xl mb-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">🚀</div>
-              <h3 className="text-2xl font-bold mb-4 transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#B983FF]">AI-Powered</h3>
-              <p className="text-white/60">Personalized learning paths and recommendations</p>
+            {/* Decorative Elements */}
+            <div className="absolute top-6 left-6">
+              <div className="w-3 h-3 bg-white/30 rounded-full"></div>
+            </div>
+            <div className="absolute top-6 left-12">
+              <div className="w-3 h-3 bg-white/20 rounded-full"></div>
+            </div>
+            <div className="absolute top-6 left-18">
+              <div className="w-3 h-3 bg-white/10 rounded-full"></div>
             </div>
             
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/10 hover:-translate-y-2 group">
-              <div className="text-4xl mb-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">🌟</div>
-              <h3 className="text-2xl font-bold mb-4 transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#A4F34A]">Social</h3>
-              <p className="text-white/60">Learn together with peers and expert tutors</p>
-            </div>
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
           </div>
         </div>
       </div>
