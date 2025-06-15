@@ -1,30 +1,40 @@
-// Interface Segregation: Focused only on sign-in functionality
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
-import { AuthLayout } from '../components/auth/AuthLayout'
-import { FormField } from '../components/auth/FormField'
-import { AuthButton } from '../components/auth/AuthButton'
-import { useAuth } from '../hooks/useAuth'
-import type { SignInFormData } from '../validators/authValidators'
+import { useUser } from '../contexts/UserContext'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
 
 export const SignIn: React.FC = () => {
-  const [formData, setFormData] = useState<SignInFormData>({
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [stars, setStars] = useState<Array<{ id: number; x: number; y: number; delay: number; size: number }>>([])
   
-  const { signIn, loading, error, clearError } = useAuth()
+  const { signIn } = useUser()
 
-  // Clear errors when user starts typing
+  // Generate animated stars
   useEffect(() => {
-    if (error || Object.keys(fieldErrors).length > 0) {
-      clearError()
-      setFieldErrors({})
+    const generateStars = () => {
+      const newStars = []
+      for (let i = 0; i < 150; i++) {
+        newStars.push({
+          id: i,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          delay: Math.random() * 3,
+          size: Math.random() * 3 + 1
+        })
+      }
+      setStars(newStars)
     }
-  }, [formData, error, clearError])
+
+    generateStars()
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -32,153 +42,180 @@ export const SignIn: React.FC = () => {
       ...prev,
       [name]: value
     }))
+    if (error) setError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    const result = await signIn(formData)
-    if (!result.success) {
-      setFieldErrors(result.errors)
+    setLoading(true)
+    setError('')
+
+    try {
+      await signIn(formData.email, formData.password)
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const features = [
-    {
-      title: 'Learn',
-      description: 'Discover content from the best educators and researchers worldwide',
-    },
-    {
-      title: 'Quiz',
-      description: 'Test your knowledge with interactive quizzes and assessments',
-    },
-    {
-      title: 'Compete',
-      description: 'Earn points and compete on leaderboards with fellow learners',
-    },
-  ]
-
   return (
-    <AuthLayout
-      title="Expand your knowledge with every scroll"
-      subtitle="Dive into a feed of educational content, research papers, and videos. Learn, engage, and climb the leaderboards."
-      features={features}
-    >
-      <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-2xl p-8 border border-neutral-200 dark:border-neutral-700">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src="/Knowza Symbol.png" 
-              alt="Knowza" 
-              className="w-10 h-10"
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated Space Background */}
+      <div className="absolute inset-0">
+        {/* Stars */}
+        {stars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute rounded-full bg-white animate-twinkle"
+            style={{
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              animationDelay: `${star.delay}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+        
+        {/* Floating Particles */}
+        <div className="absolute inset-0">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400 rounded-full animate-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
             />
-            <span className="text-2xl font-bold text-neutral-900 dark:text-white">Knowza</span>
-          </div>
-          <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">
-            Welcome Back
-          </h2>
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Sign in to continue your learning journey
-          </p>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-lg dark:bg-error-900/20 dark:border-error-800 dark:text-error-400 flex items-center gap-2">
-              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </div>
-          )}
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-blue-900/20" />
+      </div>
 
-          <FormField
-            label="Email"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="you@example.com"
-            icon={<Mail className="w-5 h-5" />}
-            error={fieldErrors.email}
-            required
-            autoComplete="email"
-            disabled={loading}
-          />
-
-          <div className="space-y-2">
-            <FormField
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="••••••••"
-              icon={<Lock className="w-5 h-5" />}
-              error={fieldErrors.password}
-              required
-              autoComplete="current-password"
-              disabled={loading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[38px] text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
-              style={{ marginTop: '0px', position: 'relative', float: 'right', transform: 'translateY(-45px)' }}
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700"
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Logo and Title */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <img 
+                src="/Knowza Symbol.png" 
+                alt="Knowza" 
+                className="w-12 h-12 drop-shadow-lg"
               />
-              <span className="ml-2 text-sm text-neutral-600 dark:text-neutral-400">
-                Remember me
-              </span>
-            </label>
-            <Link
-              to="/forgot-password"
-              className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 font-medium transition-colors"
-            >
-              Forgot password?
-            </Link>
+              <span className="text-3xl font-bold text-white drop-shadow-lg">Knowza</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
+              Welcome Back
+            </h1>
+            <p className="text-white/80 drop-shadow-sm">
+              Sign in to continue your learning journey
+            </p>
           </div>
 
-          <AuthButton
-            type="submit"
-            variant="primary"
-            size="lg"
-            loading={loading}
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? (
-              'Signing in...'
-            ) : (
-              <>
-                Sign in
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </AuthButton>
-        </form>
+          {/* Sign In Form */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-500/20 border border-red-500/30 text-red-100 px-4 py-3 rounded-lg backdrop-blur-sm">
+                  {error}
+                </div>
+              )}
 
-        <div className="mt-8 text-center">
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Don't have an account?{' '}
-            <Link
-              to="/signup"
-              className="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 transition-colors"
-            >
-              Sign up for free
-            </Link>
-          </p>
+              <div className="space-y-4">
+                <Input
+                  label="Email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="you@example.com"
+                  icon={<Mail className="w-5 h-5" />}
+                  required
+                  disabled={loading}
+                  className="bg-white/10 border-white/20 text-white placeholder-white/60 backdrop-blur-sm"
+                />
+
+                <div className="relative">
+                  <Input
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="••••••••"
+                    icon={<Lock className="w-5 h-5" />}
+                    required
+                    disabled={loading}
+                    className="bg-white/10 border-white/20 text-white placeholder-white/60 backdrop-blur-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-9 text-white/60 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center text-white/80">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-purple-600 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm">Remember me</span>
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-purple-300 hover:text-purple-200 transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    Signing in...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    Sign in
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </div>
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-white/80">
+                Don't have an account?{' '}
+                <Link
+                  to="/signup"
+                  className="text-purple-300 hover:text-purple-200 font-medium transition-colors"
+                >
+                  Sign up for free
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </AuthLayout>
+    </div>
   )
 }
