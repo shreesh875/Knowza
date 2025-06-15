@@ -4,6 +4,8 @@ import type { Database } from '../types/database'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+let supabase: ReturnType<typeof createClient<Database>>
+
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase environment variables')
   console.error('VITE_SUPABASE_URL:', supabaseUrl ? 'Present' : 'Missing')
@@ -15,7 +17,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
   
   console.warn('Using fallback Supabase configuration - app will not function properly')
   
-  export const supabase = createClient<Database>(fallbackUrl, fallbackKey)
+  supabase = createClient<Database>(fallbackUrl, fallbackKey)
 } else {
-  export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+  supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 }
+
+export { supabase }
