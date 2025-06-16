@@ -26,7 +26,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     loading
   })
 
-  // Show loading spinner while checking authentication (with timeout)
+  // Show loading spinner while checking authentication (with shorter timeout)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
