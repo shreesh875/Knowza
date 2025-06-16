@@ -41,7 +41,7 @@ export const useDeepSeekChat = (apiKey: string | null) => {
       const deepSeekMessages: DeepSeekMessage[] = [
         {
           role: 'system',
-          content: `You are BrainMate, an AI learning companion powered by DeepSeek V3. You're part of an educational platform called BrainFeed where users explore academic content, research papers, and educational videos.
+          content: `You are Knowza, an AI learning companion. You're part of an educational platform called BrainFeed where users explore academic content, research papers, and educational videos.
 
 Your role is to:
 - Help users understand concepts from their feed content
