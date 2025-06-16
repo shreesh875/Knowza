@@ -67,20 +67,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('UserProvider: Initializing authentication')
     
-    // Get initial session with timeout
+    // Get initial session
     const getInitialSession = async () => {
       try {
-        // Set a timeout to prevent infinite loading
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 20000)
-        )
-        
-        const sessionPromise = supabase.auth.getSession()
-        
-        const { data: { session }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Error getting session:', error)
@@ -94,8 +84,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Exception getting initial session:', error)
       } finally {
-        // Always set loading to false after a reasonable time
-        setTimeout(() => setLoading(false), 1000)
+        setLoading(false)
       }
     }
 
