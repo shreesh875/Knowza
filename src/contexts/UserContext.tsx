@@ -153,14 +153,30 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     console.log('Signing out user')
     
-    const { error } = await supabase.auth.signOut()
-    
-    if (error) {
-      console.error('Sign out error:', error)
-      throw error
-    }
+    try {
+      // Clear local state first
+      setUser(null)
+      setProfile(null)
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        console.error('Sign out error:', error)
+        throw error
+      }
 
-    console.log('Sign out successful')
+      console.log('Sign out successful')
+      
+      // Force a page reload to clear any cached state
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Exception during sign out:', error)
+      // Even if there's an error, clear local state and redirect
+      setUser(null)
+      setProfile(null)
+      window.location.href = '/'
+    }
   }
 
   const updateProfile = async (updates: Partial<User>) => {
