@@ -61,7 +61,7 @@ function App() {
                 <Route path="post/:postId" element={<PostDetail />} />
                 <Route path="leaderboard" element={<Leaderboard />} />
                 <Route path="profile" element={<Profile />} />
-                <Route path="brainmate" element={<BrainMate />} />
+                <Route path="knowza" element={<BrainMate />} />
               </Route>
               
               {/* Fallback */}
