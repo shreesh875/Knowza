@@ -889,14 +889,10 @@ export const BrainMate: React.FC = () => {
       setApiKey(envApiKey)
     }
 
-    // Use the new DeepSeek API key
-    const envOpenRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY || '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'
-    console.log('OpenRouter API Key:', envOpenRouterApiKey ? 'Present' : 'Missing')
-    if (envOpenRouterApiKey) {
-      setOpenRouterApiKey(envOpenRouterApiKey)
-    } else {
-      console.warn('OpenRouter API key not found in environment variables')
-    }
+    // Use the provided OpenRouter API key
+    const providedOpenRouterApiKey = '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'
+    console.log('Using provided OpenRouter API Key')
+    setOpenRouterApiKey(providedOpenRouterApiKey)
   }, [])
 
   const handlePermissionsGranted = () => {
