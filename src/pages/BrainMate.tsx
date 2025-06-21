@@ -546,9 +546,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
-      content: `Hi there! I'm Knowza, your AI learning companion. I'm here to help you understand concepts, answer questions, and create quizzes based on your feed content.
-
-What would you like to explore today? I can explain complex topics in simple terms, help with homework, or even create a quick quiz to test your knowledge!`, 
+      content: `Hi! I'm Knowza. I can help explain topics, answer questions, or create quizzes. What would you like to learn about?`, 
       role: 'assistant',
       timestamp: new Date()
     }
