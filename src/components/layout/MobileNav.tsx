@@ -4,7 +4,7 @@ import { Home, Bot, BarChart3, User } from 'lucide-react'
 
 const navigation = [
   { name: 'Home', href: '/app', icon: Home },
-  { name: 'BrainMate', href: '/app/brainmate', icon: Bot },
+  { name: 'Eden', href: '/app/brainmate', icon: Bot },
   { name: 'Leaderboard', href: '/app/leaderboard', icon: BarChart3 },
   { name: 'Profile', href: '/app/profile', icon: User },
 ]

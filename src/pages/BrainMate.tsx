@@ -320,7 +320,7 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
           Meet Your Learning Companion
         </h3>
         <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-lg mx-auto mb-6">
-          Knowza is ready to help you understand concepts from your feed, answer questions, and guide your learning journey through interactive video conversations.
+          Eden is ready to help you understand concepts from your feed, answer questions, and guide your learning journey through interactive video conversations.
         </p>
         <div className="flex items-center justify-center gap-6 text-sm text-neutral-500 dark:text-neutral-400 mb-8">
           <div className="flex items-center gap-2">
@@ -394,7 +394,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
                 <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
               </div>
               <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-neutral-600 dark:text-neutral-400 text-xl font-medium">Connecting to Knowza...</p>
+              <p className="text-neutral-600 dark:text-neutral-400 text-xl font-medium">Connecting to Eden...</p>
               <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">Preparing your personalized learning session</p>
             </div>
           </div>
@@ -546,7 +546,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     { 
       id: '1', 
-      content: `Hi! I'm Knowza. I can help explain topics, answer questions, or create quizzes. What would you like to learn about?`, 
+      content: `Hi! I'm Eden. I can help explain topics, answer questions, or create quizzes. What would you like to learn about?`, 
       role: 'assistant',
       timestamp: new Date()
     }
@@ -827,7 +827,7 @@ const ApiKeySetup: React.FC<{ onApiKeySet: (key: string) => void }> = ({ onApiKe
           Setup Required
         </h3>
         <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-lg mx-auto mb-6">
-          To enable video conversations with Knowza, please enter your Tavus API key. You can get one from the Tavus platform.
+          To enable video conversations with Eden, please enter your Tavus API key. You can get one from the Tavus platform.
         </p>
       </div>
 
@@ -973,7 +973,7 @@ export const BrainMate: React.FC = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
             </div>
-            Knowza
+            Eden
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion</p>
         </div>
@@ -1020,7 +1020,7 @@ export const BrainMate: React.FC = () => {
                     Ready for your learning session?
                   </h3>
                   <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-md mx-auto">
-                    Start a video conversation with Knowza to discuss topics from your feed and get personalized learning assistance.
+                    Start a video conversation with Eden to discuss topics from your feed and get personalized learning assistance.
                   </p>
                   <Button onClick={startVideoCall} disabled={loading} size="lg" className="px-8 py-4">
                     {loading ? (
