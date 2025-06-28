@@ -27,7 +27,7 @@ export const Sidebar: React.FC = () => {
   return (
     <div 
       className={`fixed left-4 top-4 bottom-4 z-50 transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-16' : 'w-72'
+        isCollapsed ? 'w-20' : 'w-72'
       }`}
     >
       <div className="h-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-neutral-700/50 shadow-2xl shadow-black/10 dark:shadow-black/30 flex flex-col overflow-hidden">
@@ -48,9 +48,23 @@ export const Sidebar: React.FC = () => {
             </div>
           )}
           
+          {isCollapsed && (
+            <div className="w-full flex justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+                <img 
+                  src="/Knowza Symbol.png" 
+                  alt="Knowza" 
+                  className="w-6 h-6"
+                />
+              </div>
+            </div>
+          )}
+          
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors"
+            className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors ${
+              isCollapsed ? 'absolute -right-2 top-4 bg-white dark:bg-neutral-800 shadow-lg border border-neutral-200 dark:border-neutral-700' : ''
+            }`}
           >
             {isCollapsed ? (
               <ChevronRight className="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
@@ -62,12 +76,12 @@ export const Sidebar: React.FC = () => {
 
         {/* User Profile - Removed points system */}
         {profile && (
-          <div className={`p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 ${isCollapsed ? 'px-2' : ''}`}>
+          <div className={`p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 ${isCollapsed ? 'px-3' : ''}`}>
             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
               <Avatar
                 src={profile.avatar_url}
                 alt={profile.full_name || profile.username}
-                size="md"
+                size={isCollapsed ? "lg" : "md"}
                 fallback={profile.full_name || profile.username}
                 className="ring-2 ring-primary-500/20"
               />
@@ -86,21 +100,21 @@ export const Sidebar: React.FC = () => {
         )}
 
         {/* Main Navigation - Separated from bottom actions */}
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-3">
           {navigation.map((item) => (
             <NavLink
               key={item.name}
               to={item.href}
               end={item.href === '/app'}
               className={({ isActive }) =>
-                `group flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                `group flex items-center gap-3 px-3 py-4 text-sm font-medium rounded-xl transition-all duration-200 ${
                   isActive
                     ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
                     : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700/50 dark:hover:text-white'
                 } ${isCollapsed ? 'justify-center px-2' : ''}`
               }
             >
-              <item.icon className={`w-5 h-5 ${isCollapsed ? '' : 'flex-shrink-0'}`} />
+              <item.icon className={`${isCollapsed ? 'w-7 h-7' : 'w-5 h-5'} flex-shrink-0`} />
               {!isCollapsed && (
                 <span className="truncate">{item.name}</span>
               )}
@@ -116,14 +130,14 @@ export const Sidebar: React.FC = () => {
           <div className="bg-neutral-100 dark:bg-neutral-700/30 rounded-xl p-3 space-y-2">
             <button
               onClick={toggleTheme}
-              className={`flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-white hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-600 dark:hover:text-white rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-white hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-600 dark:hover:text-white rounded-lg transition-all duration-200 ${
                 isCollapsed ? 'justify-center px-2' : ''
               }`}
             >
               {theme === 'dark' ? (
-                <Sun className="w-4 h-4 flex-shrink-0" />
+                <Sun className={`${isCollapsed ? 'w-6 h-6' : 'w-4 h-4'} flex-shrink-0`} />
               ) : (
-                <Moon className="w-4 h-4 flex-shrink-0" />
+                <Moon className={`${isCollapsed ? 'w-6 h-6' : 'w-4 h-4'} flex-shrink-0`} />
               )}
               {!isCollapsed && (
                 <span className="truncate">
@@ -134,11 +148,11 @@ export const Sidebar: React.FC = () => {
             
             <button 
               onClick={handleSignOut}
-              className={`flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 rounded-lg transition-all duration-200 ${
                 isCollapsed ? 'justify-center px-2' : ''
               }`}
             >
-              <LogOut className="w-4 h-4 flex-shrink-0" />
+              <LogOut className={`${isCollapsed ? 'w-6 h-6' : 'w-4 h-4'} flex-shrink-0`} />
               {!isCollapsed && (
                 <span className="truncate">Sign Out</span>
               )}
