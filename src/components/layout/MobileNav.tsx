@@ -1,11 +1,10 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Home, Bot, BarChart3, User } from 'lucide-react'
+import { Home, Bot, User } from 'lucide-react'
 
 const navigation = [
   { name: 'Home', href: '/app', icon: Home },
   { name: 'Eden', href: '/app/brainmate', icon: Bot },
-  { name: 'Leaderboard', href: '/app/leaderboard', icon: BarChart3 },
   { name: 'Profile', href: '/app/profile', icon: User },
 ]
 
@@ -17,6 +16,7 @@ export const MobileNav: React.FC = () => {
           <NavLink
             key={item.name}
             to={item.href}
+            end={item.href === '/app'}
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-colors ${
                 isActive

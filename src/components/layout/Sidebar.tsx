@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Home, Bot, BarChart3, User, Moon, Sun, LogOut, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Home, Bot, User, Moon, Sun, LogOut, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useUser } from '../../contexts/UserContext'
 import { Avatar } from '../ui/Avatar'
@@ -8,7 +8,6 @@ import { Avatar } from '../ui/Avatar'
 const navigation = [
   { name: 'Home', href: '/app', icon: Home },
   { name: 'Eden', href: '/app/brainmate', icon: Bot },
-  { name: 'Leaderboard', href: '/app/leaderboard', icon: BarChart3 },
   { name: 'Profile', href: '/app/profile', icon: User },
 ]
 
@@ -61,7 +60,7 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
 
-        {/* User Profile */}
+        {/* User Profile - Removed points system */}
         {profile && (
           <div className={`p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 ${isCollapsed ? 'px-2' : ''}`}>
             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
@@ -80,32 +79,19 @@ export const Sidebar: React.FC = () => {
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
                     @{profile.username}
                   </p>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                        {profile.points}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                        {profile.streak}d
-                      </span>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Navigation */}
+        {/* Main Navigation - Separated from bottom actions */}
         <nav className="flex-1 p-4 space-y-2">
           {navigation.map((item) => (
             <NavLink
               key={item.name}
               to={item.href}
+              end={item.href === '/app'}
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                   isActive
@@ -125,37 +111,39 @@ export const Sidebar: React.FC = () => {
           ))}
         </nav>
 
-        {/* Bottom Actions */}
-        <div className="p-4 border-t border-neutral-200/50 dark:border-neutral-700/50 space-y-2">
-          <button
-            onClick={toggleTheme}
-            className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700/50 dark:hover:text-white rounded-xl transition-all duration-200 ${
-              isCollapsed ? 'justify-center px-2' : ''
-            }`}
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-5 h-5 flex-shrink-0" />
-            ) : (
-              <Moon className="w-5 h-5 flex-shrink-0" />
-            )}
-            {!isCollapsed && (
-              <span className="truncate">
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-              </span>
-            )}
-          </button>
-          
-          <button 
-            onClick={handleSignOut}
-            className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-xl transition-all duration-200 ${
-              isCollapsed ? 'justify-center px-2' : ''
-            }`}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!isCollapsed && (
-              <span className="truncate">Sign Out</span>
-            )}
-          </button>
+        {/* Bottom Actions - Separated with rounded divider */}
+        <div className="p-4">
+          <div className="bg-neutral-100 dark:bg-neutral-700/30 rounded-xl p-3 space-y-2">
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-white hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-600 dark:hover:text-white rounded-lg transition-all duration-200 ${
+                isCollapsed ? 'justify-center px-2' : ''
+              }`}
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 flex-shrink-0" />
+              ) : (
+                <Moon className="w-4 h-4 flex-shrink-0" />
+              )}
+              {!isCollapsed && (
+                <span className="truncate">
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </span>
+              )}
+            </button>
+            
+            <button 
+              onClick={handleSignOut}
+              className={`flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 rounded-lg transition-all duration-200 ${
+                isCollapsed ? 'justify-center px-2' : ''
+              }`}
+            >
+              <LogOut className="w-4 h-4 flex-shrink-0" />
+              {!isCollapsed && (
+                <span className="truncate">Sign Out</span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Floating Indicator */}

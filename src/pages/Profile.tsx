@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Edit, Trophy, Target, Calendar } from 'lucide-react'
+import { Edit, Calendar } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/Card'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
@@ -58,16 +58,15 @@ export const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center gap-6 mt-4">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-500" />
-              <span className="font-semibold text-neutral-900 dark:text-white">{profile.points} points</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-success-100 text-success-700 rounded-full text-sm font-medium dark:bg-success-900/20 dark:text-success-400">
-              <Target className="w-4 h-4" />
-              <span>{profile.streak} day streak</span>
-            </div>
+          {/* Member Since */}
+          <div className="flex items-center gap-2 mt-4">
+            <Calendar className="w-5 h-5 text-neutral-500" />
+            <span className="text-neutral-600 dark:text-neutral-400">
+              Member since {new Date(profile.created_at).toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+              })}
+            </span>
           </div>
 
           {/* Interests */}

@@ -6,7 +6,6 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { LandingPage } from './pages/LandingPage'
 import { Home } from './pages/Home'
 import { PostDetail } from './pages/PostDetail'
-import { Leaderboard } from './pages/Leaderboard'
 import { Profile } from './pages/Profile'
 import { BrainMate } from './pages/BrainMate'
 import { SignIn } from './pages/SignIn'
@@ -59,7 +58,6 @@ function App() {
               }>
                 <Route index element={<Home />} />
                 <Route path="post/:postId" element={<PostDetail />} />
-                <Route path="leaderboard" element={<Leaderboard />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="brainmate" element={<BrainMate />} />
               </Route>
