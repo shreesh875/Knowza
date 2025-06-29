@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { Home, Bot, User, Moon, Sun, LogOut, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -11,10 +11,14 @@ const navigation = [
   { name: 'Profile', href: '/app/profile', icon: User },
 ]
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isCollapsed: boolean
+  onToggleCollapse: (collapsed: boolean) => void
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
   const { theme, toggleTheme } = useTheme()
   const { user, profile, signOut } = useUser()
-  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleSignOut = async () => {
     try {
@@ -61,7 +65,7 @@ export const Sidebar: React.FC = () => {
           )}
           
           <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={() => onToggleCollapse(!isCollapsed)}
             className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors ${
               isCollapsed ? 'absolute -right-2 top-4 bg-white dark:bg-neutral-800 shadow-lg border border-neutral-200 dark:border-neutral-700' : ''
             }`}
@@ -74,7 +78,7 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
 
-        {/* User Profile - Removed points system */}
+        {/* User Profile */}
         {profile && (
           <div className={`p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 ${isCollapsed ? 'px-3' : ''}`}>
             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
@@ -99,7 +103,7 @@ export const Sidebar: React.FC = () => {
           </div>
         )}
 
-        {/* Main Navigation - Separated from bottom actions */}
+        {/* Main Navigation */}
         <nav className="flex-1 p-4 space-y-3">
           {navigation.map((item) => (
             <NavLink
@@ -125,7 +129,7 @@ export const Sidebar: React.FC = () => {
           ))}
         </nav>
 
-        {/* Bottom Actions - Separated with rounded divider */}
+        {/* Bottom Actions */}
         <div className="p-4">
           <div className="bg-neutral-100 dark:bg-neutral-700/30 rounded-xl p-3 space-y-2">
             <button
