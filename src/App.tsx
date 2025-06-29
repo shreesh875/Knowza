@@ -3,7 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { UserProvider } from './contexts/UserContext'
 import { Layout } from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
-// import { LandingPage } from './pages/LandingPage' // Commented out for performance
+import { LandingPage } from './pages/LandingPage'
 import { Home } from './pages/Home'
 import { PostDetail } from './pages/PostDetail'
 import { Profile } from './pages/Profile'
@@ -19,8 +19,15 @@ function App() {
         <Router>
           <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
             <Routes>
-              {/* Redirect root to signin for now */}
-              <Route path="/" element={<Navigate to="/signin" replace />} />
+              {/* Landing page for non-authenticated users */}
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute requireAuth={false}>
+                    <LandingPage />
+                  </ProtectedRoute>
+                } 
+              />
               
               {/* Authentication routes */}
               <Route 
@@ -62,8 +69,8 @@ function App() {
                 <Route path="brainmate" element={<BrainMate />} />
               </Route>
               
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/signin" replace />} />
+              {/* Fallback - redirect to landing page */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
         </Router>
