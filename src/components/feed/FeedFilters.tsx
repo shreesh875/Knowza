@@ -71,8 +71,8 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
 
       {/* Field Filters */}
       <div className="flex items-center gap-2">
-        <Filter className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
-        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <Filter className="w-4 h-4 text-white/60" />
+        <span className="text-sm font-medium text-white/80">
           Filter by field:
         </span>
       </div>
@@ -85,8 +85,8 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
             disabled={loading}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
               activeFilter === field.id
-                ? 'bg-primary-100 text-primary-700 border border-primary-300 dark:bg-primary-900/20 dark:text-primary-400 dark:border-primary-700'
-                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
+                ? 'bg-purple-500/30 text-purple-200 border border-purple-400/50 backdrop-blur-sm'
+                : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/10 backdrop-blur-sm'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <field.icon className={`w-4 h-4 ${field.color}`} />
@@ -96,10 +96,10 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
       </div>
 
       {/* Info Banner */}
-      <div className="text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg p-3">
+      <div className="text-xs text-white/60 bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
         <div className="flex items-center gap-2 mb-1">
-          <BookOpen className="w-4 h-4 text-primary-600" />
-          <span className="font-medium">
+          <BookOpen className="w-4 h-4 text-purple-400" />
+          <span className="font-medium text-white/80">
             Multi-Source Research Feed
           </span>
         </div>

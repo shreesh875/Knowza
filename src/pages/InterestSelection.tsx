@@ -33,7 +33,7 @@ export const InterestSelection: React.FC = () => {
   // Enhanced loading state with debugging info
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
           <div className="relative mb-6">
             <div className="animate-spin w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full mx-auto"></div>
@@ -61,30 +61,7 @@ export const InterestSelection: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        {/* Large decorative circles */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 bg-blue-500/20 rounded-full blur-lg"></div>
-        <div className="absolute bottom-32 left-40 w-20 h-20 bg-cyan-500/20 rounded-full blur-lg"></div>
-        <div className="absolute bottom-20 right-20 w-28 h-28 bg-purple-400/20 rounded-full blur-xl"></div>
-        
-        {/* Small floating dots */}
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-white/30 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          />
-        ))}
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-6 py-12">
         <div className="max-w-2xl mx-auto">
           {/* Header */}

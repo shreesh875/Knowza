@@ -10,7 +10,7 @@ const navigation = [
 
 export const MobileNav: React.FC = () => {
   return (
-    <nav className="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
+    <nav className="bg-white/10 backdrop-blur-xl border-t border-white/20">
       <div className="flex justify-around">
         {navigation.map((item) => (
           <NavLink
@@ -20,8 +20,8 @@ export const MobileNav: React.FC = () => {
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 px-3 py-2 text-xs font-medium transition-colors ${
                 isActive
-                  ? 'text-primary-600 dark:text-primary-400'
-                  : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300'
+                  ? 'text-purple-400'
+                  : 'text-white/70 hover:text-white'
               }`
             }
           >

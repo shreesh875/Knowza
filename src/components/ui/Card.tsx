@@ -11,8 +11,8 @@ export const Card: React.FC<CardProps> = ({ children, className, hover = false }
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-neutral-200 shadow-sm dark:bg-neutral-800 dark:border-neutral-700',
-        hover && 'hover:shadow-md transition-shadow duration-200',
+        'bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl',
+        hover && 'hover:shadow-white/10 hover:bg-white/15 transition-all duration-300',
         className
       )}
     >
@@ -26,7 +26,7 @@ export const CardHeader: React.FC<{ children: React.ReactNode; className?: strin
   className,
 }) => {
   return (
-    <div className={cn('px-6 py-4 border-b border-neutral-200 dark:border-neutral-700', className)}>
+    <div className={cn('px-6 py-4 border-b border-white/10', className)}>
       {children}
     </div>
   )
@@ -44,7 +44,7 @@ export const CardFooter: React.FC<{ children: React.ReactNode; className?: strin
   className,
 }) => {
   return (
-    <div className={cn('px-6 py-4 border-t border-neutral-200 dark:border-neutral-700', className)}>
+    <div className={cn('px-6 py-4 border-t border-white/10', className)}>
       {children}
     </div>
   )

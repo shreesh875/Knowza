@@ -167,7 +167,7 @@ const VideoComponent: React.FC<{ id: string }> = ({ id }) => {
   }, [isVideoReady, webGLContext])
 
   return (
-    <div className="relative w-full h-[600px] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl overflow-hidden border border-primary-200 dark:border-primary-800">
+    <div className="relative w-full h-[600px] bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl overflow-hidden border border-purple-400/30 backdrop-blur-sm">
       <DailyVideo
         sessionId={id}
         type="video"
@@ -247,9 +247,9 @@ const DraggableVideoPreview: React.FC<DraggableVideoPreviewProps> = ({ localPart
   return (
     <div
       ref={videoRef}
-      className={`absolute w-48 h-36 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white shadow-lg z-10 ${
+      className={`absolute w-48 h-36 bg-neutral-900 rounded-lg overflow-hidden border-2 border-white/30 shadow-lg z-10 ${
         isDragging ? 'cursor-grabbing' : 'cursor-grab'
-      } transition-shadow hover:shadow-xl`}
+      } transition-shadow hover:shadow-xl backdrop-blur-sm`}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -313,26 +313,26 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
   return (
     <div className="text-center p-12">
       <div className="mb-8">
-        <div className="w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
-          <Bot className="w-16 h-16 text-primary-600 dark:text-primary-400" />
+        <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
+          <Bot className="w-16 h-16 text-purple-400" />
         </div>
-        <h3 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
+        <h3 className="text-3xl font-bold text-white mb-4">
           Meet Your Learning Companion
         </h3>
-        <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-lg mx-auto mb-6">
+        <p className="text-white/70 text-lg max-w-lg mx-auto mb-6">
           Eden is ready to help you understand concepts from your feed, answer questions, and guide your learning journey through interactive video conversations.
         </p>
-        <div className="flex items-center justify-center gap-6 text-sm text-neutral-500 dark:text-neutral-400 mb-8">
+        <div className="flex items-center justify-center gap-6 text-sm text-white/60 mb-8">
           <div className="flex items-center gap-2">
-            <Brain className="w-4 h-4 text-primary-600" />
+            <Brain className="w-4 h-4 text-purple-400" />
             <span>Context-Aware</span>
           </div>
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-primary-600" />
+            <BookOpen className="w-4 h-4 text-purple-400" />
             <span>Feed Integration</span>
           </div>
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-primary-600" />
+            <Target className="w-4 h-4 text-purple-400" />
             <span>Personalized</span>
           </div>
         </div>
@@ -357,7 +357,7 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
         )}
       </Button>
       
-      <div className="text-sm text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
+      <div className="text-sm text-white/60 max-w-sm mx-auto">
         Your privacy is protected. We only use your camera and microphone for video calls and never store or share your data.
       </div>
     </div>
@@ -388,14 +388,14 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
         {remoteParticipantIds.length > 0 ? (
           <VideoComponent id={remoteParticipantIds[0]} />
         ) : (
-          <div className="w-full h-[600px] bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl flex items-center justify-center border border-primary-200 dark:border-primary-800">
+          <div className="w-full h-[600px] bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl flex items-center justify-center border border-purple-400/30 backdrop-blur-sm">
             <div className="text-center">
-              <div className="w-24 h-24 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
-                <Bot className="w-12 h-12 text-primary-600 dark:text-primary-400" />
+              <div className="w-24 h-24 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
+                <Bot className="w-12 h-12 text-purple-400" />
               </div>
-              <div className="animate-spin w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-neutral-600 dark:text-neutral-400 text-xl font-medium">Connecting to Eden...</p>
-              <p className="text-neutral-500 dark:text-neutral-500 text-sm mt-2">Preparing your personalized learning session</p>
+              <div className="animate-spin w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-white text-xl font-medium">Connecting to Eden...</p>
+              <p className="text-white/70 text-sm mt-2">Preparing your personalized learning session</p>
             </div>
           </div>
         )}
@@ -430,7 +430,7 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
           variant="outline" 
           size="lg" 
           onClick={onLeave}
-          className="w-16 h-16 rounded-full border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+          className="w-16 h-16 rounded-full border-red-400/50 text-red-400 hover:bg-red-500/20"
         >
           <PhoneOff className="w-6 h-6" />
         </Button>
@@ -481,7 +481,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
       if (trimmed.endsWith(':') && trimmed.length < 80) {
         return (
           <div key={pIndex} className="mb-4">
-            <h4 className="font-semibold text-primary-700 dark:text-primary-300 text-lg mb-2">
+            <h4 className="font-semibold text-purple-300 text-lg mb-2">
               {trimmed}
             </h4>
           </div>
@@ -492,8 +492,8 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
       if (trimmed.endsWith('?')) {
         return (
           <div key={pIndex} className="mb-4">
-            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4 border-l-4 border-primary-300 dark:border-primary-600">
-              <p className="text-primary-800 dark:text-primary-200 font-medium leading-relaxed">
+            <div className="bg-purple-500/20 rounded-lg p-4 border-l-4 border-purple-400">
+              <p className="text-purple-200 font-medium leading-relaxed">
                 {trimmed}
               </p>
             </div>
@@ -506,8 +506,8 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
         return (
           <div key={pIndex} className="mb-3">
             <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
-              <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+              <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-white/90 leading-relaxed">
                 {trimmed.replace(/^\d+[\.\)]\s*/, '')}
               </p>
             </div>
@@ -518,7 +518,7 @@ const FormattedMessage: React.FC<{ content: string }> = ({ content }) => {
       // Regular paragraph with natural sentence breaks
       return (
         <div key={pIndex} className="mb-4">
-          <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
+          <p className="text-white/90 leading-relaxed">
             {sentences.map((sentence, sIndex) => (
               <span key={sIndex}>
                 {sentence.trim()}
@@ -635,16 +635,16 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
     return (
       <div className="flex items-center justify-center h-[700px]">
         <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+          <AlertCircle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-white mb-2">
             OpenRouter API Key Required
           </h3>
-          <p className="text-neutral-600 dark:text-neutral-400 max-w-md">
+          <p className="text-white/70 max-w-md">
             To use the text chat feature, please add your OpenRouter API key to the environment variables as VITE_OPENROUTER_API_KEY.
           </p>
-          <div className="mt-4 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-left">
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">Expected API key format:</p>
-            <code className="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded">
+          <div className="mt-4 p-4 bg-white/5 rounded-lg text-left backdrop-blur-sm border border-white/10">
+            <p className="text-sm text-white/70 mb-2">Expected API key format:</p>
+            <code className="text-xs bg-white/10 px-2 py-1 rounded">
               sk-or-v1-...
             </code>
           </div>
@@ -656,16 +656,16 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
   return (
     <div className="flex flex-col h-[700px]">
       {/* Context Banner */}
-      <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-4">
+      <div className="bg-purple-500/20 border border-purple-400/30 rounded-lg p-4 mb-4 backdrop-blur-sm">
         <div className="flex items-center gap-3 mb-2">
-          <Brain className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-          <h3 className="font-medium text-primary-900 dark:text-primary-100">Context from Your Feed</h3>
+          <Brain className="w-5 h-5 text-purple-400" />
+          <h3 className="font-medium text-purple-200">Context from Your Feed</h3>
         </div>
         <div className="flex flex-wrap gap-2">
           {recentFeedTopics.slice(0, 3).map((topic, index) => (
             <span
               key={index}
-              className="px-3 py-1 text-xs font-medium bg-primary-100 text-primary-700 rounded-full dark:bg-primary-900/40 dark:text-primary-300"
+              className="px-3 py-1 text-xs font-medium bg-purple-500/30 text-purple-200 rounded-full border border-purple-400/30"
             >
               {topic}
             </span>
@@ -674,7 +674,7 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-6 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
+      <div className="flex-1 overflow-y-auto space-y-6 p-4 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -682,15 +682,15 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
           >
             <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
+                  <Bot className="w-4 h-4 text-purple-400" />
                 </div>
               )}
               <div
                 className={`px-5 py-4 rounded-2xl ${
                   message.role === 'user'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-white text-neutral-900 dark:bg-neutral-700 dark:text-white shadow-sm border border-neutral-200 dark:border-neutral-600'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                    : 'bg-white/10 text-white shadow-sm border border-white/20 backdrop-blur-sm'
                 }`}
               >
                 {message.role === 'assistant' ? (
@@ -707,12 +707,12 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
         {streamingResponse && (
           <div className="flex justify-start">
             <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
-              <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
+                <Bot className="w-4 h-4 text-purple-400" />
               </div>
-              <div className="px-5 py-4 rounded-2xl bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-600">
+              <div className="px-5 py-4 rounded-2xl bg-white/10 shadow-sm text-white border border-white/20 backdrop-blur-sm">
                 <FormattedMessage content={streamingResponse} />
-                <span className="inline-block w-2 h-5 bg-primary-500 ml-1 animate-pulse rounded"></span>
+                <span className="inline-block w-2 h-5 bg-purple-400 ml-1 animate-pulse rounded"></span>
               </div>
             </div>
           </div>
@@ -721,14 +721,14 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
         {isLoading && !streamingResponse && (
           <div className="flex justify-start">
             <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
-              <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
+                <Bot className="w-4 h-4 text-purple-400" />
               </div>
-              <div className="px-5 py-4 rounded-2xl bg-white dark:bg-neutral-700 shadow-sm">
+              <div className="px-5 py-4 rounded-2xl bg-white/10 shadow-sm backdrop-blur-sm border border-white/20">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
@@ -738,39 +738,39 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg mb-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-4 bg-white/5 rounded-lg mb-4 backdrop-blur-sm border border-white/10">
         <button
           onClick={() => handleQuickAction('explain')}
-          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
+          className="flex items-center gap-2 p-3 text-sm bg-white/10 rounded-lg hover:bg-white/15 transition-colors shadow-sm backdrop-blur-sm border border-white/10"
         >
-          <Lightbulb className="w-4 h-4 text-yellow-500" />
-          <span>Explain</span>
+          <Lightbulb className="w-4 h-4 text-yellow-400" />
+          <span className="text-white/90">Explain</span>
         </button>
         <button
           onClick={() => handleQuickAction('quiz')}
-          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
+          className="flex items-center gap-2 p-3 text-sm bg-white/10 rounded-lg hover:bg-white/15 transition-colors shadow-sm backdrop-blur-sm border border-white/10"
         >
-          <Target className="w-4 h-4 text-green-500" />
-          <span>Quiz Me</span>
+          <Target className="w-4 h-4 text-green-400" />
+          <span className="text-white/90">Quiz Me</span>
         </button>
         <button
           onClick={() => handleQuickAction('homework')}
-          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
+          className="flex items-center gap-2 p-3 text-sm bg-white/10 rounded-lg hover:bg-white/15 transition-colors shadow-sm backdrop-blur-sm border border-white/10"
         >
-          <HelpCircle className="w-4 h-4 text-blue-500" />
-          <span>Help</span>
+          <HelpCircle className="w-4 h-4 text-blue-400" />
+          <span className="text-white/90">Help</span>
         </button>
         <button
           onClick={() => handleQuickAction('tips')}
-          className="flex items-center gap-2 p-3 text-sm bg-white dark:bg-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors shadow-sm"
+          className="flex items-center gap-2 p-3 text-sm bg-white/10 rounded-lg hover:bg-white/15 transition-colors shadow-sm backdrop-blur-sm border border-white/10"
         >
-          <TrendingUp className="w-4 h-4 text-purple-500" />
-          <span>Tips</span>
+          <TrendingUp className="w-4 h-4 text-purple-400" />
+          <span className="text-white/90">Tips</span>
         </button>
       </div>
 
       {/* Enhanced Input Area */}
-      <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
+      <div className="border-t border-white/10 p-4">
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
             <textarea
@@ -781,19 +781,19 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
               placeholder="Ask about your feed content, request explanations, or get study help..."
               disabled={isLoading}
               rows={1}
-              className="w-full resize-none rounded-xl border border-neutral-300 px-4 py-3 text-neutral-900 placeholder-neutral-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-400 disabled:opacity-50 transition-all"
+              className="w-full resize-none rounded-xl bg-white/10 border border-white/20 px-4 py-3 text-white placeholder-white/60 backdrop-blur-sm focus:bg-white/15 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50 transition-all"
               style={{ minHeight: '48px', maxHeight: '120px' }}
             />
           </div>
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !inputMessage.trim()}
-            className="h-12 w-12 rounded-xl flex-shrink-0 p-0 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 active:from-primary-800 active:to-primary-900 disabled:from-neutral-400 disabled:to-neutral-500 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none disabled:shadow-none"
+            className="h-12 w-12 rounded-xl flex-shrink-0 p-0 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 active:from-purple-800 active:to-blue-800 disabled:from-neutral-600 disabled:to-neutral-700 disabled:opacity-50 text-white transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none disabled:shadow-none"
           >
             <Send className="w-5 h-5" />
           </button>
         </div>
-        <div className="mt-3 text-xs text-neutral-500 dark:text-neutral-400 text-center">
+        <div className="mt-3 text-xs text-white/60 text-center">
           Powered by DeepSeek V3 via OpenRouter • Free AI model
         </div>
       </div>
@@ -820,13 +820,13 @@ const ApiKeySetup: React.FC<{ onApiKeySet: (key: string) => void }> = ({ onApiKe
   return (
     <div className="text-center p-12">
       <div className="mb-8">
-        <div className="w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
-          <Settings className="w-16 h-16 text-primary-600 dark:text-primary-400" />
+        <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
+          <Settings className="w-16 h-16 text-purple-400" />
         </div>
-        <h3 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">
+        <h3 className="text-3xl font-bold text-white mb-4">
           Setup Required
         </h3>
-        <p className="text-neutral-600 dark:text-neutral-400 text-lg max-w-lg mx-auto mb-6">
+        <p className="text-white/70 text-lg max-w-lg mx-auto mb-6">
           To enable video conversations with Eden, please enter your Tavus API key. You can get one from the Tavus platform.
         </p>
       </div>
@@ -856,13 +856,13 @@ const ApiKeySetup: React.FC<{ onApiKeySet: (key: string) => void }> = ({ onApiKe
         </Button>
       </form>
 
-      <div className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mt-6 text-sm text-white/60">
         <p className="mb-2">Don't have a Tavus API key?</p>
         <a 
           href="https://platform.tavus.io/api-keys" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-primary-600 hover:text-primary-500 dark:text-primary-400 underline"
+          className="text-purple-400 hover:text-purple-300 underline"
         >
           Get one from Tavus Platform →
         </a>
@@ -969,13 +969,13 @@ export const BrainMate: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
             </div>
             Eden
           </h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-1">Your AI learning companion</p>
+          <p className="text-white/70 mt-1">Your AI learning companion</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -1013,13 +1013,13 @@ export const BrainMate: React.FC = () => {
                 <VideoCall onLeave={endVideoCall} />
               ) : (
                 <div className="text-center py-16">
-                  <div className="w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/20 dark:to-primary-800/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary-200 dark:border-primary-800">
-                    <Bot className="w-16 h-16 text-primary-600 dark:text-primary-400" />
+                  <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
+                    <Bot className="w-16 h-16 text-purple-400" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">
+                  <h3 className="text-2xl font-semibold text-white mb-4">
                     Ready for your learning session?
                   </h3>
-                  <p className="text-neutral-600 dark:text-neutral-400 mb-6 max-w-md mx-auto">
+                  <p className="text-white/70 mb-6 max-w-md mx-auto">
                     Start a video conversation with Eden to discuss topics from your feed and get personalized learning assistance.
                   </p>
                   <Button onClick={startVideoCall} disabled={loading} size="lg" className="px-8 py-4">
@@ -1045,7 +1045,7 @@ export const BrainMate: React.FC = () => {
           )}
 
           {(error || permissionError) && (
-            <div className="m-6 p-4 bg-error-50 border border-error-200 text-error-700 rounded-lg dark:bg-error-900/20 dark:border-error-800 dark:text-error-400 flex items-start gap-3">
+            <div className="m-6 p-4 bg-red-500/20 border border-red-400/30 text-red-300 rounded-lg backdrop-blur-sm flex items-start gap-3">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <span>{error || permissionError}</span>
             </div>

@@ -116,6 +116,8 @@ export default {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'gradient-x': 'gradient-x 3s ease infinite',
         'twinkle': 'twinkle 3s ease-in-out infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'shooting-star': 'shooting-star 1.5s ease-out forwards',
         'draw-line': 'draw-line 12s ease-in-out infinite',
       },
@@ -146,6 +148,25 @@ export default {
           '50%': { 
             opacity: '1',
             transform: 'scale(1.2)'
+          },
+        },
+        'float': {
+          '0%, 100%': {
+            transform: 'translateY(0px) rotate(0deg)',
+          },
+          '33%': {
+            transform: 'translateY(-10px) rotate(120deg)',
+          },
+          '66%': {
+            transform: 'translateY(5px) rotate(240deg)',
+          },
+        },
+        'pulse-glow': {
+          '0%, 100%': {
+            boxShadow: '0 0 5px rgba(147, 51, 234, 0.5)',
+          },
+          '50%': {
+            boxShadow: '0 0 20px rgba(147, 51, 234, 0.8), 0 0 30px rgba(147, 51, 234, 0.6)',
           },
         },
         'shooting-star': {
@@ -200,6 +221,32 @@ export default {
         },
         '.backface-hidden': {
           'backface-visibility': 'hidden',
+        },
+        '.glass-morphism': {
+          background: 'rgba(255, 255, 255, 0.1)',
+          'backdrop-filter': 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          'box-shadow': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        },
+        '.space-input': {
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          color: 'white',
+          'backdrop-filter': 'blur(10px)',
+        },
+        '.space-input::placeholder': {
+          color: 'rgba(255, 255, 255, 0.6)',
+        },
+        '.space-input:focus': {
+          background: 'rgba(255, 255, 255, 0.15)',
+          'border-color': 'rgba(147, 51, 234, 0.5)',
+          'box-shadow': '0 0 0 2px rgba(147, 51, 234, 0.2)',
+        },
+        '.space-label': {
+          color: 'rgba(255, 255, 255, 0.9)',
+          'font-weight': '500',
+          'margin-bottom': '0.5rem',
+          display: 'block',
         },
       }
       addUtilities(newUtilities)

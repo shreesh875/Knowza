@@ -34,19 +34,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         isCollapsed ? 'w-20' : 'w-72'
       }`}
     >
-      <div className="h-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-neutral-700/50 shadow-2xl shadow-black/10 dark:shadow-black/30 flex flex-col overflow-hidden">
+      <div className="h-full bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl flex flex-col overflow-hidden">
         {/* Header with Logo and Collapse Button */}
-        <div className="flex items-center justify-between p-4 border-b border-neutral-200/50 dark:border-neutral-700/50">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
           {!isCollapsed && (
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
                 <img 
                   src="/Knowza Symbol.png" 
                   alt="Knowza" 
                   className="w-5 h-5"
                 />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-neutral-900 to-neutral-700 dark:from-white dark:to-neutral-300 bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-white">
                 Knowza
               </span>
             </div>
@@ -54,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           
           {isCollapsed && (
             <div className="w-full flex justify-center">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <img 
                   src="/Knowza Symbol.png" 
                   alt="Knowza" 
@@ -66,35 +66,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           
           <button
             onClick={() => onToggleCollapse(!isCollapsed)}
-            className={`p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors ${
-              isCollapsed ? 'absolute -right-2 top-4 bg-white dark:bg-neutral-800 shadow-lg border border-neutral-200 dark:border-neutral-700' : ''
+            className={`p-2 rounded-lg hover:bg-white/10 transition-colors text-white/80 hover:text-white ${
+              isCollapsed ? 'absolute -right-2 top-4 bg-white/10 shadow-lg border border-white/20' : ''
             }`}
           >
             {isCollapsed ? (
-              <ChevronRight className="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
+              <ChevronRight className="w-4 h-4" />
             ) : (
-              <ChevronLeft className="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
+              <ChevronLeft className="w-4 h-4" />
             )}
           </button>
         </div>
 
         {/* User Profile */}
         {profile && (
-          <div className={`p-4 border-b border-neutral-200/50 dark:border-neutral-700/50 ${isCollapsed ? 'px-3' : ''}`}>
+          <div className={`p-4 border-b border-white/10 ${isCollapsed ? 'px-3' : ''}`}>
             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
               <Avatar
                 src={profile.avatar_url}
                 alt={profile.full_name || profile.username}
                 size={isCollapsed ? "lg" : "md"}
                 fallback={profile.full_name || profile.username}
-                className="ring-2 ring-primary-500/20"
+                className="ring-2 ring-purple-500/20"
               />
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
+                  <p className="text-sm font-semibold text-white truncate">
                     {profile.full_name || profile.username}
                   </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                  <p className="text-xs text-white/60 truncate">
                     @{profile.username}
                   </p>
                 </div>
@@ -113,8 +113,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-3 py-4 text-sm font-medium rounded-xl transition-all duration-200 ${
                   isActive
-                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
-                    : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700/50 dark:hover:text-white'
+                    ? 'bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg shadow-purple-500/25'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
                 } ${isCollapsed ? 'justify-center px-2' : ''}`
               }
             >
@@ -131,10 +131,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
         {/* Bottom Actions */}
         <div className="p-4">
-          <div className="bg-neutral-100 dark:bg-neutral-700/30 rounded-xl p-3 space-y-2">
+          <div className="bg-white/5 rounded-xl p-3 space-y-2 border border-white/10">
             <button
               onClick={toggleTheme}
-              className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-white hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-600 dark:hover:text-white rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white rounded-lg transition-all duration-200 ${
                 isCollapsed ? 'justify-center px-2' : ''
               }`}
             >
@@ -152,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             
             <button 
               onClick={handleSignOut}
-              className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 dark:text-neutral-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 rounded-lg transition-all duration-200 ${
+              className={`flex items-center gap-3 w-full px-3 py-3 text-sm font-medium text-white/80 hover:bg-red-500/20 hover:text-red-400 rounded-lg transition-all duration-200 ${
                 isCollapsed ? 'justify-center px-2' : ''
               }`}
             >
@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
         {/* Floating Indicator */}
         <div className="absolute -right-2 top-1/2 transform -translate-y-1/2">
-          <div className="w-1 h-12 bg-gradient-to-b from-primary-500 to-primary-600 rounded-full opacity-60"></div>
+          <div className="w-1 h-12 bg-gradient-to-b from-purple-500 to-blue-600 rounded-full opacity-60"></div>
         </div>
       </div>
     </div>

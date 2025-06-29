@@ -17,10 +17,10 @@ export const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variants = {
-    primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-    secondary: 'bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500',
-    outline: 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50 focus:ring-primary-500 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800',
-    ghost: 'text-neutral-700 hover:bg-neutral-100 focus:ring-primary-500 dark:text-neutral-300 dark:hover:bg-neutral-800',
+    primary: 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none focus:ring-purple-500/20',
+    secondary: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:transform-none focus:ring-pink-500/20',
+    outline: 'border border-white/30 text-white/90 hover:bg-white/10 hover:border-white/50 backdrop-blur-sm focus:ring-purple-500/20',
+    ghost: 'text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm focus:ring-purple-500/20',
   }
   
   const sizes = {
