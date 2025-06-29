@@ -314,7 +314,11 @@ const MediaPermissions: React.FC<MediaPermissionsProps> = ({ onPermissionsGrante
     <div className="text-center p-12">
       <div className="mb-8">
         <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
-          <Bot className="w-16 h-16 text-purple-400" />
+          <img 
+            src="/Eden.png" 
+            alt="Eden" 
+            className="w-16 h-16 object-contain"
+          />
         </div>
         <h3 className="text-3xl font-bold text-white mb-4">
           Meet Your Learning Companion
@@ -391,7 +395,11 @@ const VideoCall: React.FC<{ onLeave: () => void }> = ({ onLeave }) => {
           <div className="w-full h-[600px] bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl flex items-center justify-center border border-purple-400/30 backdrop-blur-sm">
             <div className="text-center">
               <div className="w-24 h-24 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
-                <Bot className="w-12 h-12 text-purple-400" />
+                <img 
+                  src="/Eden.png" 
+                  alt="Eden" 
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <div className="animate-spin w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full mx-auto mb-4"></div>
               <p className="text-white text-xl font-medium">Connecting to Eden...</p>
@@ -683,7 +691,11 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
             <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
               {message.role === 'assistant' && (
                 <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                  <Bot className="w-4 h-4 text-purple-400" />
+                  <img 
+                    src="/Eden.png" 
+                    alt="Eden" 
+                    className="w-4 h-4 object-contain"
+                  />
                 </div>
               )}
               <div
@@ -708,7 +720,11 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
           <div className="flex justify-start">
             <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
               <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                <Bot className="w-4 h-4 text-purple-400" />
+                <img 
+                  src="/Eden.png" 
+                  alt="Eden" 
+                  className="w-4 h-4 object-contain"
+                />
               </div>
               <div className="px-5 py-4 rounded-2xl bg-white/10 shadow-sm text-white border border-white/20 backdrop-blur-sm">
                 <FormattedMessage content={streamingResponse} />
@@ -722,7 +738,11 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
           <div className="flex justify-start">
             <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
               <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                <Bot className="w-4 h-4 text-purple-400" />
+                <img 
+                  src="/Eden.png" 
+                  alt="Eden" 
+                  className="w-4 h-4 object-contain"
+                />
               </div>
               <div className="px-5 py-4 rounded-2xl bg-white/10 shadow-sm backdrop-blur-sm border border-white/20">
                 <div className="flex space-x-1">
@@ -971,7 +991,11 @@ export const BrainMate: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+              <img 
+                src="/Eden.png" 
+                alt="Eden" 
+                className="w-6 h-6 object-contain"
+              />
             </div>
             Eden
           </h1>
@@ -1014,7 +1038,11 @@ export const BrainMate: React.FC = () => {
               ) : (
                 <div className="text-center py-16">
                   <div className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/30 backdrop-blur-sm">
-                    <Bot className="w-16 h-16 text-purple-400" />
+                    <img 
+                      src="/Eden.png" 
+                      alt="Eden" 
+                      className="w-16 h-16 object-contain"
+                    />
                   </div>
                   <h3 className="text-2xl font-semibold text-white mb-4">
                     Ready for your learning session?
