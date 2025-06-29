@@ -3,7 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { UserProvider } from './contexts/UserContext'
 import { Layout } from './components/layout/Layout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
-import { LandingPage } from './pages/LandingPage'
+// import { LandingPage } from './pages/LandingPage' // Commented out for performance
 import { Home } from './pages/Home'
 import { PostDetail } from './pages/PostDetail'
 import { Profile } from './pages/Profile'
@@ -19,8 +19,8 @@ function App() {
         <Router>
           <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
             <Routes>
-              {/* Landing page - public route */}
-              <Route path="/" element={<LandingPage />} />
+              {/* Redirect root to signin for now */}
+              <Route path="/" element={<Navigate to="/signin" replace />} />
               
               {/* Authentication routes */}
               <Route 
@@ -63,7 +63,7 @@ function App() {
               </Route>
               
               {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/signin" replace />} />
             </Routes>
           </div>
         </Router>
