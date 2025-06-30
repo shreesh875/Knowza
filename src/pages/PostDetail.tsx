@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Heart, MessageCircle, Bookmark, Share, Send, User } from 'lucide-react'
+import { ArrowLeft, Heart, MessageCircle, Bookmark, Share, Send } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/Card'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
@@ -615,7 +615,7 @@ export const PostDetail: React.FC = () => {
       </Card>
 
       {/* Comments Section */}
-      <Card id="comments">
+      <Card>
         <CardContent className="p-6">
           <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-6">
             Comments ({comments.length})

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Search, Filter, Sparkles, Brain, Atom, Dna, FlaskConical, Calculator, Code, Microscope, BarChart3, Bot, Zap, BookOpen } from 'lucide-react'
+import { Search, Filter, Sparkles, Brain, Atom, Dna, FlaskConical, Code, BarChart3, Bot, Zap, BookOpen } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 

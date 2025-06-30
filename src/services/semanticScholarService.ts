@@ -44,7 +44,7 @@ class SemanticScholarService {
   }
 
   // Generate high-quality research paper thumbnails
-  private generatePaperThumbnail(paperId: string, fieldsOfStudy: string[] = []): string {
+  private generatePaperThumbnail(paperId: string): string {
     const researchThumbnails = [
       // Science and Technology
       'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -150,7 +150,7 @@ class SemanticScholarService {
         // Transform the papers to ensure proper image URLs
         const transformedPapers = data.papers?.map(paper => ({
           ...paper,
-          thumbnail: this.generatePaperThumbnail(paper.id, paper.tags),
+          thumbnail: this.generatePaperThumbnail(paper.id),
           authorAvatar: this.generateAuthorAvatar(paper.author),
           timeAgo: paper.year ? this.formatTimeAgo(paper.year) : 'Unknown',
           contentType: 'paper' as const,
@@ -194,7 +194,7 @@ class SemanticScholarService {
         if (data.paper) {
           return {
             ...data.paper,
-            thumbnail: this.generatePaperThumbnail(data.paper.id, data.paper.tags),
+            thumbnail: this.generatePaperThumbnail(data.paper.id),
             authorAvatar: this.generateAuthorAvatar(data.paper.author),
             timeAgo: data.paper.year ? this.formatTimeAgo(data.paper.year) : 'Unknown',
             contentType: 'paper' as const,

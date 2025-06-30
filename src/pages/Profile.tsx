@@ -36,7 +36,7 @@ export const Profile: React.FC = () => {
         <CardContent className="relative px-6 pb-6">
           <div className="flex items-end gap-4 -mt-16">
             <Avatar
-              src={profile.avatar_url}
+              src={profile.avatar_url || undefined}
               alt={profile.full_name || profile.username}
               size="xl"
               fallback={profile.full_name || profile.username}

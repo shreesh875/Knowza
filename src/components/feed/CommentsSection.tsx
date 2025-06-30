@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { MessageCircle, Send, Trash2, User } from 'lucide-react'
+import { MessageCircle, Send, Trash2 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Avatar } from '../ui/Avatar'
 import { useUser } from '../../contexts/UserContext'

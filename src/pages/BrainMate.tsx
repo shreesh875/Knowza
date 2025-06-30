@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useDaily, DailyVideo, useParticipantIds, useLocalSessionId, useAudioTrack, useVideoTrack, DailyAudio } from '@daily-co/daily-react'
-import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, Bot, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle, Settings } from 'lucide-react'
+import { Mic, MicOff, PhoneOff, MessageCircle, Send, Camera, CameraOff, AlertCircle, Video, BookOpen, Brain, Lightbulb, Target, TrendingUp, HelpCircle, Settings } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -683,76 +683,85 @@ const TextChat: React.FC<TextChatProps> = ({ openRouterApiKey }) => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-6 p-4 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
-              {message.role === 'assistant' && (
-                <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                  <img 
-                    src="/Eden.png" 
-                    alt="Eden" 
-                    className="w-4 h-4 object-contain"
-                  />
-                </div>
-              )}
+        {messages.length === 0 ? (
+          <div className="text-center text-white/50 py-8">
+            <img 
+              src="/Eden.png" 
+              alt="Eden" 
+              className="w-12 h-12 mx-auto mb-4 opacity-50"
+            />
+            <p className="text-lg mb-2">Start a conversation</p>
+            <p className="text-sm">Ask me anything! I'm powered by DeepSeek V3 AI via OpenRouter</p>
+          </div>
+        ) : (
+          <>
+            {messages.map((message) => (
               <div
-                className={`px-5 py-4 rounded-2xl ${
-                  message.role === 'user'
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                    : 'bg-white/10 text-white shadow-sm border border-white/20 backdrop-blur-sm'
+                key={message.id}
+                className={`flex ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {message.role === 'assistant' ? (
-                  <FormattedMessage content={message.content} />
-                ) : (
-                  <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-        
-        {/* Streaming response */}
-        {streamingResponse && (
-          <div className="flex justify-start">
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-3xl">
-              <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                <img 
-                  src="/Eden.png" 
-                  alt="Eden" 
-                  className="w-4 h-4 object-contain"
-                />
-              </div>
-              <div className="px-5 py-4 rounded-2xl bg-white/10 shadow-sm text-white border border-white/20 backdrop-blur-sm">
-                <FormattedMessage content={streamingResponse} />
-                <span className="inline-block w-2 h-5 bg-purple-400 ml-1 animate-pulse rounded"></span>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {isLoading && !streamingResponse && (
-          <div className="flex justify-start">
-            <div className="flex items-start gap-3 max-w-xs lg:max-w-md">
-              <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-purple-400/30">
-                <img 
-                  src="/Eden.png" 
-                  alt="Eden" 
-                  className="w-4 h-4 object-contain"
-                />
-              </div>
-              <div className="px-5 py-4 rounded-2xl bg-white/10 shadow-sm backdrop-blur-sm border border-white/20">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div
+                  className={`max-w-xs lg:max-w-3xl px-5 py-4 rounded-2xl flex items-start space-x-3 ${
+                    message.role === 'user'
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                      : 'bg-white/10 text-white backdrop-blur-sm border border-white/20'
+                  }`}
+                >
+                  <div className="flex-shrink-0 mt-1">
+                    {message.role === 'user' ? (
+                      <div className="w-4 h-4 bg-white/30 rounded-full" />
+                    ) : (
+                      <img 
+                        src="/Eden.png" 
+                        alt="Eden" 
+                        className="w-4 h-4 object-contain"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    {message.role === 'assistant' ? (
+                      <FormattedMessage content={message.content} />
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    )}
+                    <p className="text-xs opacity-70 mt-2">
+                      {message.timestamp.toLocaleTimeString()}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            ))}
+            
+            {/* Streaming Response */}
+            {(isLoading || streamingResponse) && (
+              <div className="flex justify-start">
+                <div className="max-w-xs lg:max-w-3xl px-5 py-4 rounded-2xl flex items-start space-x-3 bg-white/10 text-white backdrop-blur-sm border border-white/20">
+                  <div className="flex-shrink-0 mt-1">
+                    <img 
+                      src="/Eden.png" 
+                      alt="Eden" 
+                      className="w-4 h-4 object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    {streamingResponse ? (
+                      <div>
+                        <FormattedMessage content={streamingResponse} />
+                        <span className="inline-block w-2 h-5 bg-purple-400 ml-1 animate-pulse rounded"></span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-white/70">AI is thinking...</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>

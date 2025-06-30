@@ -18,7 +18,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
   const { theme, toggleTheme } = useTheme()
-  const { user, profile, signOut } = useUser()
+  const { profile, signOut } = useUser()
 
   const handleSignOut = async () => {
     try {
@@ -83,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <div className={`p-4 border-b border-white/10 ${isCollapsed ? 'px-3' : ''}`}>
             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
               <Avatar
-                src={profile.avatar_url}
+                src={profile.avatar_url || undefined}
                 alt={profile.full_name || profile.username}
                 size={isCollapsed ? "lg" : "md"}
                 fallback={profile.full_name || profile.username}

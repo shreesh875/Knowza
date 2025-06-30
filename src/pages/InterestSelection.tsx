@@ -1,8 +1,6 @@
 // Interface Segregation: Focused only on interest selection functionality
 import React, { useEffect } from 'react'
-import { ArrowRight, Sparkles, Brain, Target, Heart, Lightbulb, Users, AlertCircle } from 'lucide-react'
-import { InterestCard } from '../components/interests/InterestCard'
-import { AuthButton } from '../components/auth/AuthButton'
+import { ArrowRight, Heart, Lightbulb, Users, AlertCircle } from 'lucide-react'
 import { useInterests } from '../hooks/useInterests'
 
 export const InterestSelection: React.FC = () => {

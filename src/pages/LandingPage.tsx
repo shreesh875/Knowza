@@ -21,7 +21,6 @@ export const LandingPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isNavHovered, setIsNavHovered] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | 'direct'>('next')
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const videoSlides: VideoSlide[] = [
@@ -127,7 +126,6 @@ export const LandingPage: React.FC = () => {
     if (isTransitioning) return
     
     setIsTransitioning(true)
-    setSlideDirection('next')
     setCurrentSlide(prev => (prev + 1) % videoSlides.length)
     
     setTimeout(() => {
@@ -139,7 +137,6 @@ export const LandingPage: React.FC = () => {
     if (isTransitioning) return
     
     setIsTransitioning(true)
-    setSlideDirection('prev')
     setCurrentSlide(prev => (prev - 1 + videoSlides.length) % videoSlides.length)
     
     setTimeout(() => {
@@ -151,7 +148,6 @@ export const LandingPage: React.FC = () => {
     if (isTransitioning || index === currentSlide) return
     
     setIsTransitioning(true)
-    setSlideDirection('direct')
     setCurrentSlide(index)
     
     setTimeout(() => {

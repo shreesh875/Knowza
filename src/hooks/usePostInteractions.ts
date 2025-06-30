@@ -89,7 +89,22 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
         .order('created_at', { ascending: true })
 
       if (commentsError) throw commentsError
-      setComments(commentsData || [])
+      
+      // Transform the data to match our Comment interface
+      const transformedComments: Comment[] = (commentsData || []).map(comment => ({
+        id: comment.id,
+        content: comment.content,
+        created_at: comment.created_at,
+        updated_at: comment.updated_at,
+        user: {
+          id: comment.user.id,
+          username: comment.user.username,
+          full_name: comment.user.full_name,
+          avatar_url: comment.user.avatar_url
+        }
+      }))
+      
+      setComments(transformedComments)
 
     } catch (err) {
       console.error('Error loading post interactions:', err)
@@ -175,12 +190,26 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
             avatar_url
           )
         `)
-        .maybeSingle()
+        .single()
 
       if (error) throw error
 
+      // Transform the data to match our Comment interface
+      const newComment: Comment = {
+        id: data.id,
+        content: data.content,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        user: {
+          id: data.user.id,
+          username: data.user.username,
+          full_name: data.user.full_name,
+          avatar_url: data.user.avatar_url
+        }
+      }
+
       // Add the new comment to the list
-      setComments(prev => [...prev, data])
+      setComments(prev => [...prev, newComment])
       setCommentsCount(prev => prev + 1)
 
     } catch (err) {
@@ -240,7 +269,22 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
         .order('created_at', { ascending: true })
 
       if (commentsError) throw commentsError
-      setComments(commentsData || [])
+      
+      // Transform the data to match our Comment interface
+      const transformedComments: Comment[] = (commentsData || []).map(comment => ({
+        id: comment.id,
+        content: comment.content,
+        created_at: comment.created_at,
+        updated_at: comment.updated_at,
+        user: {
+          id: comment.user.id,
+          username: comment.user.username,
+          full_name: comment.user.full_name,
+          avatar_url: comment.user.avatar_url
+        }
+      }))
+      
+      setComments(transformedComments)
 
       // Also refresh comments count
       const { data: commentsCountData, error: commentsCountError } = await supabase
