@@ -27,11 +27,11 @@ export const LandingPage: React.FC = () => {
   const videoSlides: VideoSlide[] = [
     {
       id: 1,
-      title: "AI-Powered Learning",
-      subtitle: "Smart. Adaptive. Personal.",
-      description: "Experience personalized learning that adapts to your pace and style with advanced AI algorithms.",
-      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      posterUrl: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800",
+      title: "Knowza Launch",
+      subtitle: "The Future of Learning",
+      description: "Experience the revolutionary platform that transforms education through AI-powered personalization and social learning.",
+      videoUrl: "/SCROLL.mp4",
+      posterUrl: "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800",
       type: 'video'
     },
     {
@@ -468,24 +468,30 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Video Panel Section */}
+      {/* Video Panel Section - Meet Eden Video */}
       <div id="video" className="relative z-10 py-32 px-4">
         <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+              Meet Eden
+            </h2>
+            <p className="text-xl text-white/70 max-w-3xl mx-auto">
+              Your AI learning companion that makes education personal, engaging, and effective.
+            </p>
+          </div>
+          
           <div className="relative w-full h-[600px] bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/20">
-                  <Play className="w-12 h-12 text-white/60" />
-                </div>
-                <h3 className="text-2xl font-bold text-white/80 mb-4">
-                  Video Content Coming Soon
-                </h3>
-                <p className="text-white/60 max-w-md mx-auto">
-                  This space is reserved for your custom video content. 
-                  You can replace this placeholder with any video you'd like to showcase.
-                </p>
-              </div>
-            </div>
+            <video
+              className="w-full h-full object-cover"
+              poster="https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800"
+              controls
+              loop
+              muted
+              playsInline
+            >
+              <source src="/episode #03.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
             
             <div className="absolute top-6 left-6">
               <div className="w-3 h-3 bg-white/30 rounded-full"></div>
@@ -497,7 +503,7 @@ export const LandingPage: React.FC = () => {
               <div className="w-3 h-3 bg-white/10 rounded-full"></div>
             </div>
             
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
           </div>
         </div>
       </div>
