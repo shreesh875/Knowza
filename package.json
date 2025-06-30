@@ -30,6 +30,13 @@
     "vite": "^5.3.1",
     "tailwindcss": "^3.3.6",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "@rollup/rollup-linux-x64-gnu": "^4.9.6"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.9.6",
+    "@rollup/rollup-darwin-x64": "^4.9.6",
+    "@rollup/rollup-darwin-arm64": "^4.9.6",
+    "@rollup/rollup-win32-x64-msvc": "^4.9.6"
   }
 }
