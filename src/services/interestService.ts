@@ -170,7 +170,11 @@ export class InterestService {
         return { interests: [], error: error.message }
       }
 
-      const interests = data?.map(item => item.interests).filter(Boolean) || []
+      const interests = (data || [])
+        .map(item => item.interests)
+        .filter(Boolean)
+        .flat() as Interest[]
+      
       console.log('✅ InterestService: Fetched user interests:', interests.length)
       return { interests, error: null }
     } catch (error) {

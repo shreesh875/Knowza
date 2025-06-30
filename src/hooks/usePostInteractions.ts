@@ -78,7 +78,7 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
           content,
           created_at,
           updated_at,
-          user:profiles(
+          profiles!inner(
             id,
             username,
             full_name,
@@ -97,10 +97,10 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
         created_at: comment.created_at,
         updated_at: comment.updated_at,
         user: {
-          id: comment.user.id,
-          username: comment.user.username,
-          full_name: comment.user.full_name,
-          avatar_url: comment.user.avatar_url
+          id: (comment.profiles as any).id,
+          username: (comment.profiles as any).username,
+          full_name: (comment.profiles as any).full_name,
+          avatar_url: (comment.profiles as any).avatar_url
         }
       }))
       
@@ -183,7 +183,7 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
           content,
           created_at,
           updated_at,
-          user:profiles(
+          profiles!inner(
             id,
             username,
             full_name,
@@ -201,10 +201,10 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
         created_at: data.created_at,
         updated_at: data.updated_at,
         user: {
-          id: data.user.id,
-          username: data.user.username,
-          full_name: data.user.full_name,
-          avatar_url: data.user.avatar_url
+          id: (data.profiles as any).id,
+          username: (data.profiles as any).username,
+          full_name: (data.profiles as any).full_name,
+          avatar_url: (data.profiles as any).avatar_url
         }
       }
 
@@ -258,7 +258,7 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
           content,
           created_at,
           updated_at,
-          user:profiles(
+          profiles!inner(
             id,
             username,
             full_name,
@@ -277,10 +277,10 @@ export const usePostInteractions = (postId: string): UsePostInteractionsReturn =
         created_at: comment.created_at,
         updated_at: comment.updated_at,
         user: {
-          id: comment.user.id,
-          username: comment.user.username,
-          full_name: comment.user.full_name,
-          avatar_url: comment.user.avatar_url
+          id: (comment.profiles as any).id,
+          username: (comment.profiles as any).username,
+          full_name: (comment.profiles as any).full_name,
+          avatar_url: (comment.profiles as any).avatar_url
         }
       }))
       

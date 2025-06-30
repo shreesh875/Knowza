@@ -362,14 +362,17 @@ export const PostDetail: React.FC = () => {
 
       if (error) throw error
 
-      const formattedComments = data.map(comment => ({
-        id: comment.id,
-        content: comment.content,
-        author: comment.profiles.full_name || comment.profiles.username,
-        authorAvatar: comment.profiles.avatar_url || '',
-        timeAgo: new Date(comment.created_at).toLocaleDateString(),
-        userId: comment.user_id
-      }))
+      const formattedComments = (data || []).map(comment => {
+        const profile = comment.profiles as any
+        return {
+          id: comment.id,
+          content: comment.content,
+          author: profile.full_name || profile.username,
+          authorAvatar: profile.avatar_url || '',
+          timeAgo: new Date(comment.created_at).toLocaleDateString(),
+          userId: comment.user_id
+        }
+      })
 
       setComments(formattedComments)
     } catch (error) {
